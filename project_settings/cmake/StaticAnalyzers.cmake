@@ -3,8 +3,15 @@ option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" ON)
 if(ENABLE_CPPCHECK)
   find_program(CPPCHECK cppcheck)
   if(CPPCHECK)
-    set(CMAKE_CXX_CPPCHECK ${CPPCHECK} --suppress=missingInclude --enable=all --inconclusive -i
-                           ${CMAKE_SOURCE_DIR}/imgui/lib)
+    set(CMAKE_CXX_CPPCHECK
+        ${CPPCHECK}
+        --suppress=missingInclude
+        --enable=all
+        --inconclusive
+        -i
+        ${CMAKE_SOURCE_DIR}/test
+        --suppress=*:/opt/ros/eloquent/src/gtest_vendor/include/gtest/internal/gtest-port.h
+        --quiet)
   else()
     message(SEND_ERROR "cppcheck requested but executable not found")
   endif()
