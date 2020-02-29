@@ -1,0 +1,20 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-bionic
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build
+      env:
+        DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+        DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+      run: |
+        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+        echo 'Running build...'
+        make build_base_x86_64
+        make build_testing_x86_64

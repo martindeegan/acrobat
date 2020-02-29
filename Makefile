@@ -13,11 +13,17 @@ run_container_arm64:
 	docker run  --privileged -it martindeegan/acrobat:${TAG}_arm64
 
 # x86_64 architecture
-build_image_x86_64:
-	docker build -t martindeegan/acrobat:${TAG}_x86_64 --build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 .
+build_base_x86_64:
+	docker build -t martindeegan/acrobat:base_x86_64 --target base --file dockerfiles/base/Dockerfile --build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 .
+	docker push martindeegan/acrobat:base_x86_64
 
-push_image_x86_64:
-	docker push martindeegan/acrobat:${TAG}_x86_64
+build_testing_x86_64:
+	# If the docker image successfully builds, then the code compiles and all tests pass
+	docker build -t martindeegan/acrobat:${TAG}_testing_x86_64 --target testing --build-arg FROM_IMAGE=martindeegan/acrobat:base_x86_64 .
+
+build_runtime_x86_64:
+	docker build -t martindeegan/acrobat:${TAG}_runtime_x86_64 --target runtime --build-arg FROM_IMAGE=martindeegan/acrobat:base_x86_64 .
+	docker push martindeegan/acrobat:${TAG}_runtime_x86_64
 
 run_container_x86_64:
 	docker run  --privileged -it martindeegan/acrobat:${TAG}_x86_64
