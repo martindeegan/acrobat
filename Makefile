@@ -14,7 +14,8 @@ run_container_arm64:
 
 # x86_64 architecture
 build_base_x86_64:
-	docker build -t martindeegan/acrobat:base_x86_64 --target base --file dockerfiles/base/Dockerfile --build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 .
+	docker pull martindeegan/acrobat:base_x86_64
+	docker build -t martindeegan/acrobat:base_x86_64 --target base --file dockerfiles/base/Dockerfile --cache-from martindeegan/acrobat:base_x86_64 --build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 .
 	docker push martindeegan/acrobat:base_x86_64
 
 build_testing_x86_64:
