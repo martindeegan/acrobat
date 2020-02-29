@@ -1,4 +1,2 @@
 ---
-Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*'
-WarningsAsErrors: '1'
-HeaderFilterRegex: ''
+Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-clang-diagnostic-c++17-extensions,-misc-unused-parameters'
