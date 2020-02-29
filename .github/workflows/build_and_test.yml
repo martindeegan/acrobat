@@ -6,20 +6,18 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-    - name: build
-      env:
-        DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
-        DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
-        RUNTIME_TAG: ${steps.extract_branch.outputs.branch}
-      run: |
-        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-        echo 'Running build...'
-        
-        make build_base_x86_64 TAG=$RUNTIME_TAG
-        make build_testing_x86_64 TAG=$RUNTIME_TAG
-        make build_runtime_x86_64 TAG=$RUNTIME_TAG
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: build
+        env:
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+        run: |
+          echo "Using tag: ${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}"
+
+          docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+          echo 'Running build...'
+          
+          make build_base_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
+          make build_testing_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
+          make build_runtime_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
