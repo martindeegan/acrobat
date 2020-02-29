@@ -11,8 +11,11 @@ jobs:
       env:
         DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
         DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+        RUNTIME_TAG: ${GITHUB_REF}
       run: |
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
         echo 'Running build...'
-        make build_base_x86_64
-        make build_testing_x86_64
+        
+        make build_base_x86_64 TAG=$RUNTIME_TAG
+        make build_testing_x86_64 TAG=$RUNTIME_TAG
+        make build_runtime_x86_64 TAG=$RUNTIME_TAG
