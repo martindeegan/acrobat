@@ -4,3 +4,4 @@ acrobat_utilities
 docker-compose.yml
 Dockerfile
 Makefile
+.github
