@@ -1,0 +1,34 @@
+name: CD
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    build:
+        runs-on: ubuntu-18.04
+        steps:
+        - name: git checkout
+          uses: actions/checkout@v2
+        - name: build x86_64
+          env:
+                DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+                DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+                TAG: ${GITHUB_SHA}
+          run: |
+                echo "Using tag: $TAG"
+        
+                docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+                echo 'Running build...'
+                
+                make build_base_x86_64 TAG=${GITHUB_SHA}
+                make build_runtime_x86_64 TAG=${GITHUB_SHA}
+
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_base_x86_64 martindeegan/acrobat:latest_base_x86_64
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest_runtime_x86_64
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest
+
+                docker push martindeegan/acrobat:latest_base_x86_64
+                docker push martindeegan/acrobat:latest_runtime_x86_64
+                docker push martindeegan/acrobat:latest
