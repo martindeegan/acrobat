@@ -98,7 +98,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-eloquent-sophus \
     ros-eloquent-ament-* \
-    ros-eloquest-vision-opencv \
+    ros-eloquent-vision-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 
