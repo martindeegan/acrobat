@@ -27,7 +27,6 @@ jobs:
 
                 docker tag martindeegan/acrobat:${GITHUB_SHA}_base_x86_64 martindeegan/acrobat:latest_base_x86_64
                 docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest_runtime_x86_64
-                # Switch this to the arm build later
                 docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest
 
                 docker push martindeegan/acrobat:latest_base_x86_64
