@@ -12,14 +12,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
-    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
-    apt-get update && apt-get install -q -y tzdata && rm -rf /var/lib/apt/lists/*
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime
+RUN apt-get update && apt-get install -q --no-install-recommends -y tzdata \
+    &&  rm -rf /var/lib/apt/lists/*
 
 # ===================================
 # Install Dependencies
 # ===================================
 
-RUN apt-get update && apt-get install -q -y locales \
+RUN apt-get update && apt-get install -q --no-install-recommends -y locales \
     curl \
     gnupg2 \
     lsb-release \
@@ -108,6 +109,6 @@ ENV ROS2_WS /acrobat
 RUN mkdir -p ${ROS2_WS}/src/acrobat_packages
 WORKDIR ${ROS2_WS}
 
-RUN source "/opt/ros/${ROS_DISTRO}/setup.bash" && colcon build --symlink-install \
+RUN source "/opt/ros/${ROS_DISTRO}/setup.bash" && colcon build --symlink-install
 
 
