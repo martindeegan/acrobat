@@ -11,6 +11,7 @@ if(ENABLE_CPPCHECK)
         -i
         ${CMAKE_SOURCE_DIR}/test
         --suppress=*:/opt/ros/eloquent/src/gtest_vendor/include/gtest/internal/gtest-port.h
+        --suppress=*:/opt/ros/eloquent/include/rclcpp/function_traits.hpp
         --quiet)
   else()
     message(SEND_ERROR "cppcheck requested but executable not found")

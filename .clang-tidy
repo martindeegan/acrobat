@@ -8,4 +8,6 @@ Checks: '*,
          -llvm-*,
          -clang-diagnostic-c++17-extensions,
          -misc-unused-parameters'
+         -cppcoreguidelines-pro-type-vararg
+         -cppcoreguidelines-pro-bounds-pointer-arithmetic
 WarningsAsErrors: '*'
