@@ -73,7 +73,7 @@ RUN pip3 install -U \
     argcomplete
 
 # install ros2 base
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     ros-eloquent-ros-base \
     && rm -rf /var/lib/apt/lists/*
 
@@ -88,10 +88,26 @@ RUN make -j4 && make install
 RUN rm -rf /cmake-3.17.0-rc1
 
 # ============ Install additional packages ===============
-RUN apt-get update
-RUN apt-get install -y clang clang-tidy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    clang clang-tidy \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # ============ Install additional ROS2 packages ===============
-RUN apt-get install -y ros-eloquent-sophus
-RUN apt-get install -y ros-eloquent-ament-*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-eloquent-sophus \
+    ros-eloquent-ament-* \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# ===================================
+# Create ROS2 Workspace
+# ===================================
+
+ENV ROS2_WS /acrobat
+RUN mkdir -p ${ROS2_WS}/src/acrobat_packages
+WORKDIR ${ROS2_WS}
+
+RUN source "/opt/ros/${ROS_DISTRO}/setup.bash" && colcon build --symlink-install \
+
 

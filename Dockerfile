@@ -13,14 +13,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Create Testing Image
 # ===================================
 
-ENV ROS2_WS /acrobat
-WORKDIR ${ROS2_WS}
-RUN mkdir -p ${ROS2_WS}/src/acrobat_packages
-
 # Copy and Build Flight Software
 COPY ./ ${ROS2_WS}/src/acrobat_packages
 
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \
     --cmake-args \
@@ -30,7 +26,7 @@ RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
     -DENABLE_CPPCHECK=ON \
     -DENABLE_CLANG_TIDY=ON
 
-RUN source ${ROS2_WS}/install/setup.bash && \
+RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon test --return-code-on-test-failure
 
 # ===================================
@@ -39,14 +35,10 @@ RUN source ${ROS2_WS}/install/setup.bash && \
 
 FROM $FROM_IMAGE AS runtime
 
-ENV ROS2_WS /acrobat
-WORKDIR ${ROS2_WS}
-RUN mkdir -p ${ROS2_WS}/src/acrobat_packages
-
 # Copy and Build Flight Software
 COPY ./ ${ROS2_WS}/src/acrobat_packages
 
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \
     --cmake-args \

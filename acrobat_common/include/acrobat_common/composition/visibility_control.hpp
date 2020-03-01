@@ -40,5 +40,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // COMPOSITION__VISIBILITY_CONTROL_H_
