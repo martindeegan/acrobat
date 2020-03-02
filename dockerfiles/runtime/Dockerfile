@@ -2,7 +2,7 @@ ARG FROM_IMAGE
 FROM $FROM_IMAGE
 
 # Copy and Build Flight Software
-COPY ./ ${ROS2_WS}/src/acrobat_packages
+COPY ./ ${ROS2_WS}/src/acrobat
 
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \

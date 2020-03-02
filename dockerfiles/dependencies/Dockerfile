@@ -6,7 +6,10 @@ FROM $FROM_IMAGE
 
 # ============ Install additional packages ===============
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    clang clang-tidy \
+    clang \
+    clang-tidy \
+    libasio-dev \
+    libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional ROS2 packages ===============
@@ -14,3 +17,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-eloquent-sophus \
     ros-eloquent-ament-* \
     && rm -rf /var/lib/apt/lists/*
+
+# ============ Install additional packages from source ===============
+RUN git clone https://github.com/christianrauch/msp.git ${ROS2_WS}/src/msp
+RUN source "${ROS2_WS}/install/setup.bash" && \
+    colcon build \
+    --symlink-install \
+    --cmake-args \
+    -DSECURITY=ON \
+    --no-warn-unused-cli \
+    -DBUILD_TESTING=OFF \
+    -DENABLE_CPPCHECK=OFF \
+    -DENABLE_CLANG_TIDY=OFF \
+    -DCMAKE_BUILD_TYPE=Release
