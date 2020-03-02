@@ -20,14 +20,16 @@ RUN apt-get update && apt-get install -q --no-install-recommends -y tzdata \
 # Install Dependencies
 # ===================================
 
-RUN apt-get update && apt-get install -q --no-install-recommends -y locales \
-    curl \
-    gnupg2 \
-    lsb-release \
-    software-properties-common \
+RUN apt-get update && apt-get install -q --no-install-recommends -y \
+    build-essential \
     bash-completion \
+    curl \
     dirmngr \
+    gnupg2 \
+    locales \
+    lsb-release \
     python3-pip \
+    software-properties-common \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
