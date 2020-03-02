@@ -9,8 +9,7 @@
 
 using namespace std::chrono_literals;
 
-namespace acrobat {
-namespace msp_bridge {
+namespace acrobat::msp_bridge {
 
 class MspBridge : public rclcpp::Node {
   public:
@@ -59,8 +58,7 @@ class MspBridge : public rclcpp::Node {
     rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
 };
 
-} // namespace msp_bridge
-} // namespace acrobat
+} // namespace acrobat::msp_bridge
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
