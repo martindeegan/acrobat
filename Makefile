@@ -15,6 +15,7 @@ build_base_arm64:
 				 .
 
 build_dependencies_arm64:
+	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	docker build -t martindeegan/acrobat:${TAG}_dependencies_arm64 \
 				 --file dockerfiles/dependencies/Dockerfile \
 				 --cache-from martindeegan/acrobat:${CACHE_TAG}_dependencies_arm64 \
@@ -22,6 +23,7 @@ build_dependencies_arm64:
 				 .
 
 build_arm64:
+	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	docker build -t martindeegan/acrobat:${TAG}_${BUILD_TYPE}_arm64 \
 				 --file dockerfiles/${BUILD_TYPE}/Dockerfile \
 				 --cache-from martindeegan/acrobat:${CACHE_TAG}_${BUILD_TYPE}_arm64 \
