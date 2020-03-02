@@ -19,7 +19,7 @@ https://github.com/benhoyt/inih
 #include <stdio.h>
 #include <string.h>
 
-#include "arducam/ini.h"
+#include <arducam_config_parser/ini.h>
 
 #if !INI_USE_STACK
 #include <stdlib.h>

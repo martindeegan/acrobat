@@ -1,14 +1,19 @@
-#include "arducam/image_viewer.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 
-#include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"
+#include <arducam/image_viewer.hpp>
 
 using std::placeholders::_1;
 
 ImageViewer::ImageViewer(const rclcpp::NodeOptions& options)
-    : Node("image_viewer", options), image_(cv::Mat()) {
+    : Node("image_viewer", options), window_name_("arducam"), image_(cv::Mat()) {
     subscriber_ = create_subscription<sensor_msgs::msg::Image>(
         "/acrobat/camera", 10, std::bind(&ImageViewer::receiveImage, this, _1));
+    cv::namedWindow(window_name_, cv::WINDOW_AUTOSIZE); // Create a window for display.
+}
+
+ImageViewer::~ImageViewer() {
+    cv::destroyWindow(window_name_);
 }
 
 void ImageViewer::receiveImage(const sensor_msgs::msg::Image::SharedPtr msg) {
@@ -18,14 +23,9 @@ void ImageViewer::receiveImage(const sensor_msgs::msg::Image::SharedPtr msg) {
         throw(cv::Exception());
     }
 
-    cv::namedWindow("Arducam", cv::WINDOW_AUTOSIZE); // Create a window for display.
-    cv::imshow("Arducam", image_);
+    cv::imshow(window_name_, image_);
     cv::waitKey(1);
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
-
-// Register the component with class_loader.
-// This acts as a sort of entry point, allowing the component to be discoverable when its library
-// is being loaded into a running process.
 RCLCPP_COMPONENTS_REGISTER_NODE(ImageViewer)

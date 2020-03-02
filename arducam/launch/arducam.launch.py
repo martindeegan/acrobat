@@ -2,6 +2,7 @@ import launch
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 
+
 def generate_launch_description():
     container = ComposableNodeContainer(
         node_name='arducam_container',
@@ -12,12 +13,13 @@ def generate_launch_description():
             ComposableNode(
                 package='arducam',
                 node_plugin='ArducamDriver',
-                node_name='arducam_driver'
+                node_name='arducam_driver',
+                parameters=[{'config_name': 'camera_register_config.cfg'}]
             ),
             ComposableNode(
                 package='arducam',
                 node_plugin='ImageViewer',
-                node_name='image_viewer'
+                node_name='image_viewer',
             )
         ],
         output='screen',
