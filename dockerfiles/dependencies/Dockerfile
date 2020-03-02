@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional packages from source ===============
-RUN git clone https://github.com/christianrauch/msp.git ${ROS2_WS}/src/msp
+RUN git clone https://github.com/christianrauch/msp.git --branch 3.3.0 "${ROS2_WS}/src/msp"
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \
