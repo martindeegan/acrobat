@@ -5,8 +5,8 @@
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#include "arducam/ArduCamLib.h"
-#include "arducam_config_parser.h"
+#include <arducam_config_parser.h>
+#include <arducam_sdk/ArduCamLib.h>
 #include <termios.h>
 #include <thread>
 

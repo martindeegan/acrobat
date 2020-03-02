@@ -14,8 +14,21 @@ find_package(cv_bridge REQUIRED)
 
 include_directories(include)
 
-# create ament index resource which references the libraries in the binary dir
-set(node_plugins "")
+# Find architecture and choose correct library object
+execute_process( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
+if( ${ARCHITECTURE} STREQUAL "x86_64" )
+  set(ARDUCAM_LIB_OBJECT ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.so)
+elseif( ${ARCHITECTURE} STREQUAL "aarch64" )
+  set(ARDUCAM_LIB_OBJECT ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.so)
+endif()
+
+# Create symlink
+set(ARDUCAM_SYMBOLIC_LINK ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so)
+file(CREATE_LINK ${ARDUCAM_LIB_OBJECT} ${ARDUCAM_SYMBOLIC_LINK} SYMBOLIC)
+
+add_library(arducam_sdk SHARED IMPORTED)
+set_target_properties(arducam_sdk PROPERTIES IMPORTED_LOCATION ${ARDUCAM_SYMBOLIC_LINK})
 
 add_library(arducam_config_parser SHARED
   src/arducam_config_parser.c
@@ -27,11 +40,12 @@ add_library(arducam_driver SHARED
   src/arducam_driver.cpp
 )
 target_link_libraries(arducam_driver
-  ArduCamLib
   usb-1.0
   pthread
   arducam_config_parser
+  arducam_sdk
 )
+
 target_compile_definitions(arducam_driver PRIVATE
   "COMPOSITION_BUILDING_DLL"
 )
