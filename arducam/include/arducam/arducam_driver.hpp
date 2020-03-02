@@ -25,8 +25,8 @@ class ArducamDriver : public rclcpp::Node {
     int  color_mode = 0;
     bool running    = true;
 
-    std::thread capture_thread;
-    std::thread read_thread;
+    std::thread capture_thread_;
+    std::thread read_thread_;
 
     std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
 
