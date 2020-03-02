@@ -17,6 +17,12 @@ include_directories(include)
 # create ament index resource which references the libraries in the binary dir
 set(node_plugins "")
 
+add_library(arducam_config_parser SHARED
+  src/arducam_config_parser.c
+  src/ini.c
+)
+set_target_properties(arducam_config_parser PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
+
 add_library(arducam_driver SHARED
   src/arducam_driver.cpp
 )
@@ -92,7 +98,10 @@ ament_target_dependencies(manual_arducam
 #   "project_settings"
 # )
 
-install(TARGETS arducam_driver image_viewer
+install(TARGETS 
+  arducam_driver 
+  image_viewer 
+  arducam_config_parser
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
