@@ -84,6 +84,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.17.0-rc1/cmake-3.17.0-rc1.tar.gz
 RUN mkdir -p /cmake_source
 RUN tar -xvzf cmake-3.17.0-rc1.tar.gz
+RUN rm cmake-3.17.0-rc1.tar.gz
 WORKDIR /cmake-3.17.0-rc1
 RUN ./bootstrap
 RUN make -j4 && make install
