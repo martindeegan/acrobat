@@ -23,6 +23,6 @@ jobs:
                                          BUILD_TYPE=dependencies \
                                          FROM_TAG=latest \
                                          CACHE_TAG=latest
-          make build_testing_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
+          make build_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
                                     BUILD_TYPE=testing \
                                     CACHE_TAG=latest
