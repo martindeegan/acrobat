@@ -25,8 +25,6 @@ ament_export_libraries(acrobat_common)
 ament_export_dependencies(Sophus tf2_geometry_msgs)
 ament_export_interfaces(export_acrobat_common HAS_LIBRARY_TARGET)
 
-install(DIRECTORY include/ DESTINATION include)
-
 install(
   TARGETS acrobat_common
   EXPORT export_acrobat_common
@@ -35,6 +33,8 @@ install(
   ARCHIVE DESTINATION lib
   INCLUDES
   DESTINATION include)
+
+install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   add_subdirectory(test)
