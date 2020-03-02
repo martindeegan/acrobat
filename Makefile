@@ -15,7 +15,7 @@ build_base_arm64:
 				 .
 
 build_dependencies_arm64:
-	docker build -t martindeegan/acrobat:${TAG}_dependencies_arm64b \
+	docker build -t martindeegan/acrobat:${TAG}_dependencies_arm64 \
 				 --file dockerfiles/dependencies/Dockerfile \
 				 --cache-from martindeegan/acrobat:${CACHE_TAG}_dependencies_arm64 \
 				 --build-arg FROM_IMAGE=martindeegan/acrobat:${FROM_TAG}_base_arm64 \
