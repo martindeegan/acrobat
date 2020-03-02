@@ -1,14 +1,15 @@
 #pragma once
 
+#include <termios.h>
+#include <thread>
+
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#include <arducam_config_parser.h>
+#include <arducam_config_parser/arducam_config_parser.h>
 #include <arducam_sdk/ArduCamLib.h>
-#include <termios.h>
-#include <thread>
 
 class ArducamDriver : public rclcpp::Node {
   public:

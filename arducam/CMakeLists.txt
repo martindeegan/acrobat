@@ -3,6 +3,7 @@ project(arducam)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rcutils REQUIRED)
@@ -15,120 +16,92 @@ find_package(cv_bridge REQUIRED)
 include_directories(include)
 
 # Find architecture and choose correct library object
-execute_process( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+execute_process(
+  COMMAND uname -m
+  COMMAND tr -d '\n'
+  OUTPUT_VARIABLE ARCHITECTURE)
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
-if( ${ARCHITECTURE} STREQUAL "x86_64" )
-  set(ARDUCAM_LIB_OBJECT ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.so)
-elseif( ${ARCHITECTURE} STREQUAL "aarch64" )
-  set(ARDUCAM_LIB_OBJECT ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.so)
+if(${ARCHITECTURE} STREQUAL "x86_64")
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.so ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so
+       SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.so.2 ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so.2
+       SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.so.2.0.0
+       ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so.2.0.0 SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/x86_64/libArduCamLib.a ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.a
+       SYMBOLIC)
+elseif(${ARCHITECTURE} STREQUAL "aarch64")
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.so ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so
+       SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.so.2 ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so.2
+       SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.so.2.0.0
+       ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so.2.0.0 SYMBOLIC)
+  file(CREATE_LINK ${PROJECT_SOURCE_DIR}/lib/arm64/libArduCamLib.a ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.a SYMBOLIC)
 endif()
 
 # Create symlink
 set(ARDUCAM_SYMBOLIC_LINK ${CMAKE_INSTALL_PREFIX}/lib/libArduCamLib.so)
-file(CREATE_LINK ${ARDUCAM_LIB_OBJECT} ${ARDUCAM_SYMBOLIC_LINK} SYMBOLIC)
 
-add_library(arducam_sdk SHARED IMPORTED)
-set_target_properties(arducam_sdk PROPERTIES IMPORTED_LOCATION ${ARDUCAM_SYMBOLIC_LINK})
+# Arducam SDK Target
+add_library(arducam_sdk INTERFACE)
+target_link_libraries(arducam_sdk INTERFACE ${ARDUCAM_SYMBOLIC_LINK})
+target_include_directories(arducam_sdk INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                                 "$<INSTALL_INTERFACE:include>")
 
-add_library(arducam_config_parser SHARED
-  src/arducam_config_parser.c
-  src/ini.c
-)
+# Arducam Config Parser Target
+add_library(arducam_config_parser SHARED src/arducam_config_parser/arducam_config_parser.c
+                                         src/arducam_config_parser/ini.c)
+target_include_directories(arducam_config_parser PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                                        "$<INSTALL_INTERFACE:include>")
 set_target_properties(arducam_config_parser PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
 
-add_library(arducam_driver SHARED
-  src/arducam_driver.cpp
-)
-target_link_libraries(arducam_driver
-  usb-1.0
-  pthread
-  arducam_config_parser
-  arducam_sdk
-)
-
-target_compile_definitions(arducam_driver PRIVATE
-  "COMPOSITION_BUILDING_DLL"
-)
-set_target_properties(arducam_driver PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
-ament_target_dependencies(arducam_driver
+# Arducam Driver Target
+add_library(arducam_driver SHARED src/arducam_driver.cpp)
+target_include_directories(arducam_driver PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                                 "$<INSTALL_INTERFACE:include>")
+ament_target_dependencies(
+  arducam_driver
   "project_settings"
   "sensor_msgs"
   "rclcpp"
   "rclcpp_components"
-  "std_msgs"
-  "vision_opencv"
   "cv_bridge"
-)
+  "ament_index_cpp")
+target_link_libraries(arducam_driver usb-1.0 pthread arducam_config_parser ${ARDUCAM_SYMBOLIC_LINK})
+target_compile_definitions(arducam_driver PRIVATE "COMPOSITION_BUILDING_DLL")
 rclcpp_components_register_nodes(arducam_driver "ArducamDriver")
 set(node_plugins "${node_plugins}ArducamDriver;$<TARGET_FILE:arducam_driver>\n")
 
-add_library(image_viewer SHARED
-  src/image_viewer.cpp
-)
-target_compile_definitions(image_viewer PRIVATE
-  "COMPOSITION_BUILDING_DLL"
-)
-set_target_properties(image_viewer PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
-ament_target_dependencies(image_viewer
-  "project_settings"
-  "sensor_msgs"
-  "rclcpp"
-  "rclcpp_components"
-  "std_msgs"
-  "vision_opencv"
-  "cv_bridge"
-)
+# Image Viewer Target
+add_library(image_viewer SHARED src/image_viewer.cpp)
+target_include_directories(image_viewer PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                               "$<INSTALL_INTERFACE:include>")
+target_compile_definitions(image_viewer PRIVATE "COMPOSITION_BUILDING_DLL")
+ament_target_dependencies(image_viewer "project_settings" "sensor_msgs" "rclcpp" "rclcpp_components" "cv_bridge")
 rclcpp_components_register_nodes(image_viewer "ImageViewer")
 set(node_plugins "${node_plugins}ImageViewer;$<TARGET_FILE:image_viewer>\n")
 
-# since the package installs libraries without exporting them
-# it needs to make sure that the library path is being exported
-ament_environment_hooks("${ament_cmake_package_templates_ENVIRONMENT_HOOK_LIBRARY_PATH}")
+add_executable(manual_arducam src/manual_arducam.cpp)
+target_link_libraries(manual_arducam arducam_driver image_viewer)
+ament_target_dependencies(manual_arducam "project_settings" "rclcpp")
 
+ament_export_include_directories(include)
+ament_export_libraries(arducam_driver image_viewer)
+ament_export_dependencies(arducam_sdk arducam_config_parser)
+ament_export_interfaces(export_arducam_driver HAS_LIBRARY_TARGET)
 
-add_executable(manual_arducam
-  src/manual_arducam.cpp
-)
-target_link_libraries(manual_arducam
-  arducam_driver
-  image_viewer
-)
-ament_target_dependencies(manual_arducam
-  "project_settings"
-  "rclcpp"
-)
+install(DIRECTORY include DESTINATION include)
 
-# add_executable(dlopen_composition
-#   src/dlopen_composition.cpp
-# )
-# target_link_libraries(dlopen_composition
-#   arducam_driver
-#   image_viewer
-# )
-# ament_target_dependencies(dlopen_composition
-#   "class_loader"
-#   "rclcpp"
-#   "rclcpp_components"
-#   "project_settings"
-# )
-
-install(TARGETS 
-  arducam_driver 
-  image_viewer 
-  arducam_config_parser
+install(
+  TARGETS arducam_driver image_viewer arducam_config_parser manual_arducam
+  EXPORT export_arducam_driver
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+  RUNTIME DESTINATION bin)
 
-install(TARGETS
-  manual_arducam
-  # dlopen_composition
-  DESTINATION lib/${PROJECT_NAME})
+# Install launch and config files.
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
-# Install launch files.
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}
-)
 ament_package()

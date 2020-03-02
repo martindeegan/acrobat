@@ -2,12 +2,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "arducam/arducam_config_parser.h"
-#include "arducam/ini.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <arducam_config_parser/arducam_config_parser.h>
+#include <arducam_config_parser/ini.h>
 
 TypeMap section_types[] = {
     {"camera parameter", SECTION_TYPE_CAMERA},

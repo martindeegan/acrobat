@@ -1,8 +1,3 @@
-#include "arducam/arducam_driver.hpp"
-
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
-
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -12,9 +7,32 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
+
+#include <arducam/arducam_driver.hpp>
+
 using namespace std::chrono;
+using namespace std::chrono_literals;
 
 ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam_driver", options) {
+    declare_parameter("config_name");
+    auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this);
+
+    while (!parameters_client->wait_for_service(1s)) {
+        if (!rclcpp::ok()) {
+            RCLCPP_ERROR(this->get_logger(),
+                         "Interrupted while waiting for the parameters client. Exiting.");
+            rclcpp::shutdown();
+        }
+    }
+
+    const auto config_name = parameters_client->get_parameter<std::string>("config_name");
+    const auto config_filepath =
+        ament_index_cpp::get_package_share_directory("arducam") + "/config/" + config_name;
+    RCLCPP_ERROR(get_logger(), "Loading config file from %s", config_filepath.c_str());
+
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_lflag &= ~(ICANON);
@@ -22,13 +40,19 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
 
     publisher = create_publisher<sensor_msgs::msg::Image>("/acrobat/camera", 10);
 
-    if (!cameraInit("/usr/local/ArduCam/AR0135_MONO_8b_1280x964_51fps.cfg")) {
+    if (!cameraInit(config_filepath)) {
         RCLCPP_ERROR(get_logger(), "Failed to initialize the camera driver\n");
     }
 
+    rclcpp::sleep_for(1s);
+
     ArduCam_setMode(cameraHandle, CONTINUOUS_MODE);
-    capture_thread_ = std::thread(&ArducamDriver::captureImage_thread, this);
-    read_thread_    = std::thread(&ArducamDriver::readImage_thread, this);
+
+    // Replace this with `create_wall_timer`. Nodes under composition should not be managing their
+    // own loops. We have an executor for that
+
+    // capture_thread_ = std::thread(&ArducamDriver::captureImage_thread, this);
+    // read_thread_    = std::thread(&ArducamDriver::readImage_thread, this);
 }
 
 ArducamDriver::~ArducamDriver() {
@@ -238,8 +262,4 @@ void ArducamDriver::configBoard(const Config& config) {
 }
 
 #include "rclcpp_components/register_node_macro.hpp"
-
-// Register the component with class_loader.
-// This acts as a sort of entry point, allowing the component to be discoverable when its library
-// is being loaded into a running process.
 RCLCPP_COMPONENTS_REGISTER_NODE(ArducamDriver)

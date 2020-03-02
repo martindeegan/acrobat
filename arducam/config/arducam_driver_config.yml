@@ -1,0 +1,4 @@
+acrobat:
+    arducam_driver:
+        ros_parameters:
+            config_name: "camera_register_config.cfg"
