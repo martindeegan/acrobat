@@ -1,11 +1,11 @@
-# ===================================
-# Set parent images
-# ===================================
+# Base Dockerfile - Builds expensive dockerfile. This should not be run on CI/CD
+#   Installs: 
+#       ROS2 Eloquent
+#       CMake
+#   Sets up ROS2 workspace
 
-# For base image
-ARG FROM_IMAGE=nvcr.io/nvidia/l4t-base:r32.3.1
-
-FROM $FROM_IMAGE AS base
+ARG FROM_IMAGE
+FROM $FROM_IMAGE
 
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
@@ -20,14 +20,16 @@ RUN apt-get update && apt-get install -q --no-install-recommends -y tzdata \
 # Install Dependencies
 # ===================================
 
-RUN apt-get update && apt-get install -q --no-install-recommends -y locales \
-    curl \
-    gnupg2 \
-    lsb-release \
-    software-properties-common \
+RUN apt-get update && apt-get install -q --no-install-recommends -y \
+    build-essential \
     bash-completion \
+    curl \
     dirmngr \
+    gnupg2 \
+    locales \
+    lsb-release \
     python3-pip \
+    software-properties-common \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
@@ -87,19 +89,6 @@ RUN ./bootstrap
 RUN make -j4 && make install
 # Clean build files to reduce size
 RUN rm -rf /cmake-3.17.0-rc1
-
-# ============ Install additional packages ===============
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    clang clang-tidy \
-    && rm -rf /var/lib/apt/lists/*
-
-
-# ============ Install additional ROS2 packages ===============
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ros-eloquent-sophus \
-    ros-eloquent-ament-* \
-    && rm -rf /var/lib/apt/lists/*
-
 
 # ===================================
 # Create ROS2 Workspace

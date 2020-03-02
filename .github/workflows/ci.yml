@@ -7,7 +7,7 @@ on:
       - '!master'
 
 jobs:
-  build:
+  build_x86_64:
     runs-on: ubuntu-18.04
     steps:
       - name: git checkout
@@ -17,11 +17,33 @@ jobs:
           DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
           DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
         run: |
-          echo "Using tag: ${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}"
-
           docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-          echo 'Running build...'
-          
-          make build_base_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
-          make build_testing_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
-          make build_runtime_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER}
+
+          make build_dependencies_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
+                                         FROM_TAG=latest \
+                                         CACHE_TAG=latest
+          make build_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
+                                    BUILD_TYPE=testing \
+                                    CACHE_TAG=latest
+  build_arm64:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu binfmt-support qemu-user-static
+      - name: build
+        env:
+          DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+          DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+        run: |
+          docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+
+          make build_dependencies_arm64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
+                                         FROM_TAG=latest \
+                                         CACHE_TAG=latest
+          make build_arm64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
+                                    BUILD_TYPE=testing \
+                                    CACHE_TAG=latest
