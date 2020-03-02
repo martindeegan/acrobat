@@ -46,22 +46,23 @@ jobs:
                 DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
           run: |
                 docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-                echo 'Running build...'
+                echo 'Hello World!'
                 
-                make build_arm64 TAG=${GITHUB_SHA} \
-                                  BUILD_TYPE=dependencies \
-                                  FROM_TAG=latest \
-                                  CACHE_TAG=latest
-                make build_arm64 TAG=${GITHUB_SHA} \
-                                  BUILD_TYPE=runtime \
-                                  CACHE_TAG=latest
+                # make build_arm64 TAG=${GITHUB_SHA} \
+                #                   BUILD_TYPE=dependencies \
+                #                   FROM_TAG=latest \
+                #                   CACHE_TAG=latest
+                # make build_arm64 TAG=${GITHUB_SHA} \
+                #                   BUILD_TYPE=runtime \
+                #                   CACHE_TAG=latest
 
-                docker tag martindeegan/acrobat:${GITHUB_SHA}_dependencies_arm64 martindeegan/acrobat:latest_dependencies_arm64
-                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest_runtime_arm64
-                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest
+                # docker tag martindeegan/acrobat:${GITHUB_SHA}_dependencies_arm64 martindeegan/acrobat:latest_dependencies_arm64
+                # docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest_runtime_arm64
+                # docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest
 
-                make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=dependencies
-                make push_arm64 TAG=latest PUSH_TYPE=dependencies
-                make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=runtime
-                make push_arm64 TAG=latest PUSH_TYPE=runtime
-	              docker push martindeegan/acrobat:latest
+                # make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=dependencies
+                # make push_arm64 TAG=latest PUSH_TYPE=dependencies
+                # make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=runtime
+                # make push_arm64 TAG=latest PUSH_TYPE=runtime
+                # docker push martindeegan/acrobat:latest
+
