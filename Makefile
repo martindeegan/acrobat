@@ -1,4 +1,5 @@
 TAG=${USER}_devel
+DOCKER_BUILDKIT=1
 
 # arm64 architecture
 build_image_arm64:
@@ -15,7 +16,13 @@ run_container_arm64:
 # x86_64 architecture
 build_base_x86_64:
 	docker pull martindeegan/acrobat:latest_base_x86_64
-	docker build -t martindeegan/acrobat:${TAG}_base_x86_64 --target base --file dockerfiles/base/Dockerfile --cache-from martindeegan/acrobat:latest_base_x86_64 --build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 .
+	docker build -t martindeegan/acrobat:${TAG}_base_x86_64 --target base \
+															--file dockerfiles/base/Dockerfile \
+															--build-arg FROM_IMAGE=nvidia/cuda:10.2-devel-ubuntu18.04 \
+															--build-arg BUILDKIT_INLINE_CACHE=1 \
+															--cache-from martindeegan/acrobat:${TAG}_base_x86_64 \
+															--cache-from martindeegan/acrobat:latest_base_x86_64 \
+															. 
 
 push_base_x86_64:
 	docker push martindeegan/acrobat:${TAG}_base_x86_64

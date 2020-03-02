@@ -4,7 +4,6 @@
 
 # For base image
 ARG FROM_IMAGE=nvcr.io/nvidia/l4t-base:r32.3.1
-
 FROM $FROM_IMAGE AS base
 
 SHELL ["/bin/bash", "-c"]
@@ -88,25 +87,6 @@ RUN ./bootstrap
 RUN make -j4 && make install
 # Clean build files to reduce size
 RUN rm -rf /cmake-3.17.0-rc1
-
-# ============ Install Arducam Config Parser ===============
-RUN git clone https://github.com/ArduCAM/arducam_config_parser.git
-WORKDIR /arducam_config_parser
-RUN make clean
-RUN make
-RUN make install
-WORKDIR /
-run rm -rf /arducam_config_parser
-
-# ============ Install Arducam SDK ===============
-RUN git clone https://github.com/ArduCAM/ArduCAM_USB_Camera_Shield.git
-WORKDIR /ArduCAM_USB_Camera_Shield/Nvidia_Jetson/Cpp/Streaming_demo
-RUN make clean
-RUN make install-sdk
-WORKDIR /
-RUN mkdir -p /usr/local/ArduCam
-RUN cp /ArduCAM_USB_Camera_Shield/Config/USB3.0_UC-425_Rev.C/AR0135_MONO_8b_1280x964_51fps.cfg /usr/local/ArduCam
-RUN rm -rf ArduCAM_USB_Camera_Shield
 
 # ============ Install additional packages ===============
 RUN apt-get update && apt-get install -y --no-install-recommends \
