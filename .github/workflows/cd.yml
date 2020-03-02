@@ -6,29 +6,62 @@ on:
             - master
 
 jobs:
-    build:
+    deploy_x86_64:
         runs-on: ubuntu-18.04
         steps:
         - name: git checkout
           uses: actions/checkout@v2
-        - name: build x86_64
+        - name: build and deploy
           env:
                 DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
                 DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
-                TAG: ${GITHUB_SHA}
           run: |
-                echo "Using tag: $TAG"
-        
                 docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
                 echo 'Running build...'
                 
-                make build_base_x86_64 TAG=${GITHUB_SHA}
-                make build_runtime_x86_64 TAG=${GITHUB_SHA}
+                make build_x86_64 TAG=${GITHUB_SHA} \
+                                  BUILD_TYPE=dependencies \
+                                  FROM_TAG=latest \
+                                  CACHE_TAG=latest
+                make build_x86_64 TAG=${GITHUB_SHA} \
+                                  BUILD_TYPE=runtime \
+                                  CACHE_TAG=latest
 
-                docker tag martindeegan/acrobat:${GITHUB_SHA}_base_x86_64 martindeegan/acrobat:latest_base_x86_64
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_dependencies_x86_64 martindeegan/acrobat:latest_dependencies_x86_64
                 docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest_runtime_x86_64
-                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_x86_64 martindeegan/acrobat:latest
 
-                docker push martindeegan/acrobat:latest_base_x86_64
-                docker push martindeegan/acrobat:latest_runtime_x86_64
-                docker push martindeegan/acrobat:latest
+                make push_x86_64 TAG=${GITHUB_SHA} PUSH_TYPE=dependencies
+                make push_x86_64 TAG=latest PUSH_TYPE=dependencies
+                make push_x86_64 TAG=${GITHUB_SHA} PUSH_TYPE=runtime
+                make push_x86_64 TAG=latest PUSH_TYPE=runtime
+
+    deploy_arm_64:
+        runs-on: ubuntu-18.04
+        steps:
+        - name: git checkout
+          uses: actions/checkout@v2
+        - name: build and deploy
+          env:
+                DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
+                DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+          run: |
+                docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+                echo 'Running build...'
+                
+                make build_arm64 TAG=${GITHUB_SHA} \
+                                  BUILD_TYPE=dependencies \
+                                  FROM_TAG=latest \
+                                  CACHE_TAG=latest
+                make build_arm64 TAG=${GITHUB_SHA} \
+                                  BUILD_TYPE=runtime \
+                                  CACHE_TAG=latest
+
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_dependencies_arm64 martindeegan/acrobat:latest_dependencies_arm64
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest_runtime_arm64
+                docker tag martindeegan/acrobat:${GITHUB_SHA}_runtime_arm64 martindeegan/acrobat:latest
+
+                make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=dependencies
+                make push_arm64 TAG=latest PUSH_TYPE=dependencies
+                make push_arm64 TAG=${GITHUB_SHA} PUSH_TYPE=runtime
+                make push_arm64 TAG=latest PUSH_TYPE=runtime
+	              docker push martindeegan/acrobat:latest
