@@ -40,6 +40,10 @@ jobs:
         steps:
         - name: git checkout
           uses: actions/checkout@v2
+        - name: install dependencies
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y qemu binfmt-support qemu-user-static
         - name: build and deploy
           env:
                 DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
