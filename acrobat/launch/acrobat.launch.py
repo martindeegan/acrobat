@@ -1,23 +1,16 @@
 import launch
-from launch_ros.actions import ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
+import launch.actions
+import launch.substitutions
+import launch_ros.actions
 
 
 def generate_launch_description():
-    container = ComposableNodeContainer(
-        node_name='arducam_container',
-        node_namespace='',
-        package='rclcpp_components',
-        node_executable='component_container',
-        composable_node_descriptions=[
-            ComposableNode(
-                package='arducam',
-                node_plugin='ArducamDriver',
-                node_name='arducam_driver',
-                parameters=[{'config_name': 'camera_register_config.cfg'}]
-            )
-        ],
-        output='screen',
-    )
-
-    return launch.LaunchDescription([container])
+    return launch.LaunchDescription([
+        launch_ros.actions.Node(
+            package='acrobat', 
+            node_executable='acrobat_executor', 
+            output='screen', 
+            emulate_tty=True,
+            parameters=[{'config_name': 'camera_register_config.cfg'}]
+        )
+    ])

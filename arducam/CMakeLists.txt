@@ -88,10 +88,9 @@ ament_target_dependencies(manual_arducam "project_settings" "rclcpp")
 
 ament_export_include_directories(include)
 ament_export_libraries(arducam_driver image_viewer)
-ament_export_dependencies(arducam_sdk arducam_config_parser)
 ament_export_interfaces(export_arducam_driver HAS_LIBRARY_TARGET)
 
-install(DIRECTORY include DESTINATION include)
+install(DIRECTORY include/ DESTINATION include)
 
 install(
   TARGETS arducam_driver image_viewer arducam_config_parser manual_arducam
