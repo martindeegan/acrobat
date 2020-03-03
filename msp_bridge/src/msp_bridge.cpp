@@ -19,7 +19,7 @@ class MspBridge : public rclcpp::Node {
   public:
     ACROBAT_COMPOSITION_PUBLIC
 
-    MspBridge(const rclcpp::NodeOptions& options) : Node("msp_bridge", options) {
+    explicit MspBridge(const rclcpp::NodeOptions& options) : Node("msp_bridge", options) {
         declare_parameter("device");
         declare_parameter("baudrate");
         declare_parameter("imu_frequency");

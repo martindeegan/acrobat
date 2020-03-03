@@ -22,6 +22,19 @@ rclcpp_components_register_nodes(msp_bridge "msp_bridge::MspBridge")
 
 install(TARGETS msp_bridge DESTINATION lib)
 
+ament_export_libraries(msp_bridge)
+ament_export_dependencies(rclcpp rclcpp_components)
+ament_export_interfaces(export_msp_bridge HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS msp_bridge
+  EXPORT export_msp_bridge
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  INCLUDES
+  DESTINATION include)
+
 if(BUILD_TESTING)
   find_package(ament_cmake_clang_format REQUIRED)
 
@@ -29,7 +42,7 @@ if(BUILD_TESTING)
   symlink_link_configs()
 
   find_file(CLANG_FORMAT_CONFIG PATHS ${CMAKE_INSTALL_PREFIX}/..)
-  ament_clang_format(TESTNAME acrobat_common_clang_format_test CONFIG_FILE ${CLANG_FORMAT_CONFIG})
+  ament_clang_format(TESTNAME msp_bridge_clang_format_test CONFIG_FILE ${CLANG_FORMAT_CONFIG})
 endif()
 
 ament_package()
