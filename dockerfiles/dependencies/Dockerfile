@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     clang-tidy \
     libasio-dev \
     libboost-all-dev \
+    libusb-1.0-0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional ROS2 packages ===============
