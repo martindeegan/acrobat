@@ -83,14 +83,14 @@ void ArducamDriver::convert_frame_to_message(uint8_t*                 frame_data
 }
 
 void ArducamDriver::captureImage_callback() {
-    static size_t   frame_id = 0;
     ArduCamOutData* frameData;
 
     ArduCam_captureImage(cameraHandle);
 
     uint32_t rtn_val = ArduCam_readImage(cameraHandle, frameData);
     if (rtn_val == USB_CAMERA_NO_ERROR) {
-        auto msg = std::make_unique<sensor_msgs::msg::Image>();
+        static size_t frame_id = 0;
+        auto          msg      = std::make_unique<sensor_msgs::msg::Image>();
         convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
         publisher->publish(std::move(msg));
         ArduCam_del(cameraHandle);
@@ -180,7 +180,7 @@ bool ArducamDriver::cameraInit(const std::string& filename) {
                 ArduCam_writeSensorReg(cameraHandle, configs[i].params[0], configs[i].params[1]);
                 break;
             case CONFIG_TYPE_DELAY:
-                usleep(1000 * configs[i].params[0]);
+                rclcpp::sleep_for(microseconds(configs[i].params[0]));
                 break;
             case CONFIG_TYPE_VRCMD:
                 configBoard(configs[i]);
