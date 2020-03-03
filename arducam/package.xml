@@ -13,9 +13,8 @@
   <test_depend>ament_lint_common</test_depend>
 
   <build_depend>project_settings</build_depend>
-  <build_depend>ament_index</build_depend>
-  <build_depend>vision_opencv</build_depend>
-  <build_depend>cv_bridge</build_depend>
+  <exec_depend>ament_index</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

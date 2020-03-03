@@ -11,6 +11,8 @@
 #include <arducam_config_parser/arducam_config_parser.h>
 #include <arducam_sdk/ArduCamLib.h>
 
+namespace acrobat::arducam {
+
 class ArducamDriver : public rclcpp::Node {
   public:
     explicit ArducamDriver(const rclcpp::NodeOptions& options);
@@ -35,3 +37,5 @@ class ArducamDriver : public rclcpp::Node {
 
     rclcpp::TimerBase::SharedPtr timer_;
 };
+
+} // namespace acrobat::arducam

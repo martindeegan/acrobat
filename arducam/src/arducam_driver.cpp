@@ -17,8 +17,10 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
+namespace acrobat::arducam {
 ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam_driver", options) {
     declare_parameter("config_name");
+    declare_parameter("camera_delay");
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this);
 
     while (!parameters_client->wait_for_service(1s)) {
@@ -55,7 +57,9 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     }
     RCLCPP_INFO(get_logger(), "Capture began, rtn_val = %zd\n", rtn_val);
 
-    timer_ = create_wall_timer(18.5ms, std::bind(&ArducamDriver::captureImage_callback, this));
+    const auto camera_delay = parameters_client->get_parameter<double>("camera_delay");
+    timer_                  = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay),
+                               std::bind(&ArducamDriver::captureImage_callback, this));
 }
 
 ArducamDriver::~ArducamDriver() {
@@ -219,5 +223,7 @@ void ArducamDriver::configBoard(const Config& config) {
                            u8Buf);
 }
 
+} // namespace acrobat::arducam
+
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(ArducamDriver)
+RCLCPP_COMPONENTS_REGISTER_NODE(acrobat::arducam::ArducamDriver)

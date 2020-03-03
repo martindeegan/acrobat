@@ -4,13 +4,11 @@ project(arducam)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(project_settings REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rcutils REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(project_settings REQUIRED)
-find_package(vision_opencv REQUIRED)
 find_package(cv_bridge REQUIRED)
 
 include_directories(include)
@@ -70,8 +68,8 @@ ament_target_dependencies(
   "ament_index_cpp")
 target_link_libraries(arducam_driver usb-1.0 pthread arducam_config_parser ${ARDUCAM_SYMBOLIC_LINK})
 target_compile_definitions(arducam_driver PRIVATE "COMPOSITION_BUILDING_DLL")
-rclcpp_components_register_nodes(arducam_driver "ArducamDriver")
-set(node_plugins "${node_plugins}ArducamDriver;$<TARGET_FILE:arducam_driver>\n")
+rclcpp_components_register_nodes(arducam_driver "acrobat::arducam::ArducamDriver")
+set(node_plugins "${node_plugins}acrobat::arducam::ArducamDriver;$<TARGET_FILE:arducam_driver>\n")
 
 # Image Viewer Target
 add_library(image_viewer SHARED src/image_viewer.cpp)
@@ -79,8 +77,8 @@ target_include_directories(image_viewer PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURREN
                                                "$<INSTALL_INTERFACE:include>")
 target_compile_definitions(image_viewer PRIVATE "COMPOSITION_BUILDING_DLL")
 ament_target_dependencies(image_viewer "project_settings" "sensor_msgs" "rclcpp" "rclcpp_components" "cv_bridge")
-rclcpp_components_register_nodes(image_viewer "ImageViewer")
-set(node_plugins "${node_plugins}ImageViewer;$<TARGET_FILE:image_viewer>\n")
+rclcpp_components_register_nodes(image_viewer "acrobat::image_viewer::ImageViewer")
+set(node_plugins "${node_plugins}acrobat::image_viewer::ImageViewer;$<TARGET_FILE:image_viewer>\n")
 
 add_executable(manual_arducam src/manual_arducam.cpp)
 target_link_libraries(manual_arducam arducam_driver image_viewer)
@@ -102,5 +100,15 @@ install(
 # Install launch and config files.
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_clang_format REQUIRED)
+
+  # Get link config files
+  symlink_link_configs()
+
+  find_file(CLANG_FORMAT_CONFIG PATHS ${CMAKE_INSTALL_PREFIX}/..)
+  ament_clang_format(TESTNAME arducam_clang_format_test CONFIG_FILE ${CLANG_FORMAT_CONFIG})
+endif()
 
 ament_package()

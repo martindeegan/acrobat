@@ -11,6 +11,6 @@ def generate_launch_description():
             node_executable='acrobat_executor', 
             output='screen', 
             emulate_tty=True,
-            parameters=[{'config_name': 'camera_register_config.cfg'}]
+            parameters=[{'config_name': 'camera_register_config.cfg'},{'camera_delay':18.5}]
         )
     ])

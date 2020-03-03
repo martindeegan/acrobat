@@ -8,6 +8,7 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <std_msgs/msg/string.hpp>
 
+namespace acrobat::image_viewer {
 class ImageViewer : public rclcpp::Node {
   public:
     explicit ImageViewer(const rclcpp::NodeOptions& options);
@@ -19,3 +20,5 @@ class ImageViewer : public rclcpp::Node {
     void    receiveImage(const sensor_msgs::msg::Image::SharedPtr msg);
     cv::Mat image_;
 };
+
+} // namespace acrobat::image_viewer

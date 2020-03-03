@@ -5,6 +5,8 @@
 
 using std::placeholders::_1;
 
+namespace acrobat::image_viewer {
+
 ImageViewer::ImageViewer(const rclcpp::NodeOptions& options)
     : Node("image_viewer", options), window_name_("arducam"), image_(cv::Mat()) {
     subscriber_ = create_subscription<sensor_msgs::msg::Image>(
@@ -27,5 +29,7 @@ void ImageViewer::receiveImage(const sensor_msgs::msg::Image::SharedPtr msg) {
     cv::waitKey(1);
 }
 
+} // namespace acrobat::image_viewer
+
 #include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(ImageViewer)
+RCLCPP_COMPONENTS_REGISTER_NODE(acrobat::image_viewer::ImageViewer)
