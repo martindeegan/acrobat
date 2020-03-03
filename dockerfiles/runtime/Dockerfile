@@ -13,6 +13,18 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
     -DBUILD_TESTING=OFF \
     -DENABLE_CPPCHECK=OFF \
     -DENABLE_CLANG_TIDY=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    --packages-select project_settings
+
+RUN source "${ROS2_WS}/install/setup.bash" && \
+    colcon build \
+    --symlink-install \
+    --cmake-args \
+    -DSECURITY=ON \
+    --no-warn-unused-cli \
+    -DBUILD_TESTING=OFF \
+    -DENABLE_CPPCHECK=OFF \
+    -DENABLE_CLANG_TIDY=OFF \
     -DCMAKE_BUILD_TYPE=Release
 
 # ===================================
