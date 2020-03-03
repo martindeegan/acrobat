@@ -21,24 +21,17 @@ class ArducamDriver : public rclcpp::Node {
     ArduCamHandle  cameraHandle;
     struct termios oldt, newt;
 
-    bool save_raw   = false;
-    bool save_flag  = false;
-    int  color_mode = 0;
-    bool running    = true;
-
-    std::thread capture_thread_;
-    std::thread read_thread_;
-
     std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
 
     bool cameraInit(const std::string& filename);
 
     void configBoard(const Config& config);
 
-    void captureImage_thread();
-    void readImage_thread();
+    void captureImage_callback();
 
     void convert_frame_to_message(uint8_t*                 frame_data,
                                   size_t                   frame_id,
                                   sensor_msgs::msg::Image& msg);
+
+    rclcpp::TimerBase::SharedPtr timer_;
 };

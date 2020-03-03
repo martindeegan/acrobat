@@ -5,6 +5,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -48,91 +49,50 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
 
     ArduCam_setMode(cameraHandle, CONTINUOUS_MODE);
 
-    // Replace this with `create_wall_timer`. Nodes under composition should not be managing their
-    // own loops. We have an executor for that
+    uint32_t rtn_val = ArduCam_beginCaptureImage(cameraHandle);
+    if (rtn_val == USB_CAMERA_USB_TASK_ERROR) {
+        RCLCPP_ERROR(get_logger(), "Error beginning capture, rtn_val = %zd\n", rtn_val);
+    }
+    RCLCPP_INFO(get_logger(), "Capture began, rtn_val = %zd\n", rtn_val);
 
-    // capture_thread_ = std::thread(&ArducamDriver::captureImage_thread, this);
-    // read_thread_    = std::thread(&ArducamDriver::readImage_thread, this);
+    timer_ = create_wall_timer(18.5ms, std::bind(&ArducamDriver::captureImage_callback, this));
 }
 
 ArducamDriver::~ArducamDriver() {
-    running = false;
-    capture_thread_.join();
-    read_thread_.join();
-
+    ArduCam_endCaptureImage(cameraHandle);
     ArduCam_close(cameraHandle);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-}
-
-void ArducamDriver::readImage_thread() {
-    static size_t   frame_id = 1;
-    const size_t    n_frames = 30;
-    ArduCamOutData* frameData; // Uint8* data = frameData->pu8ImageData;
-
-    time_point<system_clock, duration<double>> t_start = system_clock::now();
-    while (running) {
-        if (ArduCam_availableImage(cameraHandle) > 0) {
-            uint32_t rtn_val = ArduCam_readImage(cameraHandle, frameData);
-            if (rtn_val == USB_CAMERA_NO_ERROR) {
-                auto msg = std::make_unique<sensor_msgs::msg::Image>();
-                convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
-                publisher->publish(std::move(msg));
-                ArduCam_del(cameraHandle);
-
-                // RCLCPP_INFO(get_logger(), "Frame recieved %zd\n", frame_id);
-
-                ++frame_id;
-                if (frame_id >= n_frames) {
-                    duration<double> dt = system_clock::now() - t_start;
-                    t_start             = system_clock::now(); // reset t_start
-                    RCLCPP_INFO(get_logger(), "Camera fps = %lf\n", n_frames / dt.count());
-                    frame_id = 1;
-                }
-            }
-        }
-    }
-    // RCLCPP_INFO()
-    RCLCPP_INFO(get_logger(), "Read thread stopped\n");
 }
 
 void ArducamDriver::convert_frame_to_message(uint8_t*                 frame_data,
                                              size_t                   frame_id,
                                              sensor_msgs::msg::Image& msg) {
     // copy cv information into ros message
-    msg.height       = cameraCfg.u32Height;
-    msg.width        = cameraCfg.u32Width;
-    msg.is_bigendian = false;
-    size_t size      = msg.height * msg.width;
-    msg.data.resize(size);
-    memcpy(&msg.data[0], frame_data, size);
+    msg.height          = cameraCfg.u32Height;
+    msg.width           = cameraCfg.u32Width;
+    msg.is_bigendian    = false;
+    size_t size         = msg.height * msg.width;
+    msg.data            = std::vector<uint8_t>(frame_data, frame_data + size);
     msg.header.frame_id = std::to_string(frame_id);
     msg.encoding        = sensor_msgs::image_encodings::TYPE_8UC1; // opencv type
 }
 
-void ArducamDriver::captureImage_thread() {
-    uint32_t rtn_val = ArduCam_beginCaptureImage(cameraHandle);
+void ArducamDriver::captureImage_callback() {
+    static size_t   frame_id = 0;
+    ArduCamOutData* frameData;
 
-    if (rtn_val == USB_CAMERA_USB_TASK_ERROR) {
-        RCLCPP_ERROR(get_logger(), "Error beginning capture, rtn_val = %zd\n", rtn_val);
-        return;
+    ArduCam_captureImage(cameraHandle);
+
+    uint32_t rtn_val = ArduCam_readImage(cameraHandle, frameData);
+    if (rtn_val == USB_CAMERA_NO_ERROR) {
+        auto msg = std::make_unique<sensor_msgs::msg::Image>();
+        convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
+        publisher->publish(std::move(msg));
+        ArduCam_del(cameraHandle);
+
+        ++frame_id;
     }
-    RCLCPP_INFO(get_logger(), "Capture began, rtn_val = %zd\n", rtn_val);
-
-    while (running) {
-        rtn_val = ArduCam_captureImage(cameraHandle);
-        if (rtn_val == USB_CAMERA_USB_TASK_ERROR) {
-            RCLCPP_ERROR(get_logger(), "Error capture image, rtn_val = %zd\n", rtn_val);
-            break;
-        }
-
-        if (rtn_val > 0xFF) {
-            RCLCPP_ERROR(get_logger(), "Error capture image, rtn_val = %zd\n", rtn_val);
-        }
-    }
-    running = false;
-    ArduCam_endCaptureImage(cameraHandle);
-    RCLCPP_INFO(get_logger(), "Capture thread stopped.\n");
 }
 
 bool ArducamDriver::cameraInit(const std::string& filename) {
@@ -164,7 +124,6 @@ bool ArducamDriver::cameraInit(const std::string& filename) {
         break;
     }
 
-    color_mode = cam_param->format & 0xFF;
     switch (cam_param->format >> 8) {
     case 0:
         cameraCfg.emImageFmtMode = FORMAT_MODE_RAW;
@@ -202,7 +161,6 @@ bool ArducamDriver::cameraInit(const std::string& filename) {
         cameraCfg.u8PixelBytes = 1;
     } else if (cameraCfg.u8PixelBits > 8 && cameraCfg.u8PixelBits <= 16) {
         cameraCfg.u8PixelBytes = 2;
-        save_raw               = true;
     }
 
     int ret_val = ArduCam_autoopen(cameraHandle, &cameraCfg);
