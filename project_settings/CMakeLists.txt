@@ -31,6 +31,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 ament_export_interfaces(export_project_settings HAS_LIBRARY_TARGET)
+
 install(
   TARGETS project_settings
   EXPORT export_project_settings

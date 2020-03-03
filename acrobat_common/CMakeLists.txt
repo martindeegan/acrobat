@@ -22,8 +22,11 @@ target_link_libraries(acrobat_common Sophus::Sophus)
 
 ament_export_include_directories(include)
 ament_export_libraries(acrobat_common)
-ament_export_dependencies(sophus tf2_geometry_msgs)
+ament_export_dependencies(Sophus tf2_geometry_msgs)
 ament_export_interfaces(export_acrobat_common HAS_LIBRARY_TARGET)
+
+install(DIRECTORY include/ DESTINATION include)
+
 install(
   TARGETS acrobat_common
   EXPORT export_acrobat_common

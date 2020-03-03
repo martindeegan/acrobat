@@ -7,5 +7,6 @@ Checks: '*,
          -modernize-use-trailing-return-type,
          -llvm-*,
          -clang-diagnostic-c++17-extensions,
-         -misc-unused-parameters'
+         -misc-unused-parameters,
+         -hicpp-special-member-functions
 WarningsAsErrors: '*'
