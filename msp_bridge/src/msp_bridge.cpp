@@ -38,8 +38,8 @@ class MspBridge : public rclcpp::Node {
 
         auto imu_frequency   = parameter_client->get_parameter<double>("imu_frequency");
         auto motor_frequency = parameter_client->get_parameter<double>("motor_frequency");
-        msp_client_.subscribe(&MspBridge::on_motor, this, imu_frequency);
-        msp_client_.subscribe(&MspBridge::on_imu, this, motor_frequency);
+        msp_client_.subscribe(&MspBridge::on_motor, this, 1.0 / motor_frequency);
+        msp_client_.subscribe(&MspBridge::on_imu, this, 1.0 / imu_frequency);
 
         imu_msg_.header.frame_id = "/acrobat/fc";
     }

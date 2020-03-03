@@ -1,0 +1,6 @@
+msp_bridge:
+  ros_parameters:
+    device: "/dev/ttyUSB0"
+    baudrate: 500000
+    imu_frequency: 100
+    motor_frequency: 100
