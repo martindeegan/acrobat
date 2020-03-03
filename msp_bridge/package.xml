@@ -12,10 +12,12 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <build_depend>acrobat_msgs</build_depend>
   <build_depend>projct_settings</build_depend>
   <build_depend>acrobat_common</build_depend>
   <build_depend>msp</build_depend>
 
+  <exec_depend>acrobat_msgs</exec_depend>
   <exec_depend>acrobat_common</exec_depend>
   <exec_depend>msp</exec_depend>
 

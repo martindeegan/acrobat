@@ -4,6 +4,7 @@ project(msp_bridge)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_search_module(PKG_MSP REQUIRED IMPORTED_TARGET msp)
@@ -11,13 +12,15 @@ pkg_search_module(PKG_MSP REQUIRED IMPORTED_TARGET msp)
 # find project dependencies
 find_package(project_settings REQUIRED)
 find_package(acrobat_common REQUIRED)
+find_package(acrobat_msgs REQUIRED)
 
-add_executable(msp_bridge src/msp_bridge.cpp)
-ament_target_dependencies(msp_bridge "rclcpp" "sensor_msgs" "acrobat_common" "project_settings")
+add_library(msp_bridge SHARED src/msp_bridge.cpp)
+ament_target_dependencies(msp_bridge "rclcpp" "sensor_msgs" "acrobat_common" "acrobat_msgs" "project_settings")
 target_link_libraries(msp_bridge PkgConfig::PKG_MSP)
 
-install(TARGETS msp_bridge DESTINATION lib/${PROJECT_NAME})
-install(TARGETS msp_bridge DESTINATION bin)
+rclcpp_components_register_nodes(msp_bridge "msp_bridge::MspBridge")
+
+install(TARGETS msp_bridge DESTINATION lib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_clang_format REQUIRED)
