@@ -1,16 +1,37 @@
 import launch
-import launch.actions
-import launch.substitutions
-import launch_ros.actions
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
-    return launch.LaunchDescription([
-        launch_ros.actions.Node(
-            package='acrobat', 
-            node_executable='acrobat_executor', 
-            output='screen', 
-            emulate_tty=True,
-            parameters=[{'config_name': 'camera_register_config.cfg'},{'camera_delay':18.5}]
-        )
-    ])
+    container = ComposableNodeContainer(
+        node_name='acrobat_container',
+        node_namespace='',
+        package='rclcpp_components',
+        node_executable='component_container',
+        composable_node_descriptions=[
+            ComposableNode(
+                package='arducam',
+                node_plugin='acrobat::arducam::ArducamDriver',
+                node_name='arducam_driver',
+                parameters=[{
+                    'config_name': 'camera_register_config.cfg',
+                    'camera_delay': 18.5
+                }]
+            ),
+            ComposableNode(
+                package='msp_bridge',
+                node_plugin='acrobat::msp_bridge::MspBridge',
+                node_name='msp_bridge',
+                parameters=[{
+                    'device': '/dev/serial/by-id/usb-Betaflight_CLRACINGF4_0x8000000-if00',
+                    'baudrate': 115200, 
+                    'imu_frequency': 100.0, 
+                    'motor_frequency': 100.0
+                }]
+            )
+        ],
+        output='screen',
+    )
+
+    return launch.LaunchDescription([container])

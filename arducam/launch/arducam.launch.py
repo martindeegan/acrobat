@@ -12,13 +12,16 @@ def generate_launch_description():
         composable_node_descriptions=[
             ComposableNode(
                 package='arducam',
-                node_plugin='ArducamDriver',
+                node_plugin='acrobat::arducam::ArducamDriver',
                 node_name='arducam_driver',
-                parameters=[{'config_name': 'camera_register_config.cfg'}]
+                parameters=[{
+                    'config_name': 'camera_register_config.cfg', 
+                    'camera_delay':18.5
+                }]
             ),
             ComposableNode(
                 package='arducam',
-                node_plugin='ImageViewer',
+                node_plugin='acrobat::image_viewer::ImageViewer',
                 node_name='image_viewer',
             )
         ],
