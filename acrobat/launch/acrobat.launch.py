@@ -24,7 +24,7 @@ def generate_launch_description():
                 node_plugin='acrobat::msp_bridge::MspBridge',
                 node_name='msp_bridge',
                 parameters=[{
-                    'device': '/dev/serial/by-id/usb-Betaflight_CLRACINGF4_0x8000000-if00',
+                    'device': '/dev/msp',
                     'baudrate': 115200, 
                     'imu_frequency': 100.0, 
                     'motor_frequency': 100.0
