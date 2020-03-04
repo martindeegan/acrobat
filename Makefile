@@ -58,3 +58,10 @@ build_x86_64:
 push_x86_64:
 	docker push martindeegan/acrobat:${TAG}_${PUSH_TYPE}_x86_64
 
+pull_latest:
+	docker pull martindeegan/acrobat:latest_base_x86_64
+	docker pull martindeegan/acrobat:latest_dependencies_x86_64
+	docker pull martindeegan/acrobat:latest_runtime_x86_64
+	docker pull martindeegan/acrobat:latest_base_arm64
+	docker pull martindeegan/acrobat:latest_dependencies_arm64
+	docker pull martindeegan/acrobat:latest_runtime_arm64

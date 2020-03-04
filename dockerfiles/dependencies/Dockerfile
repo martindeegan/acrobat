@@ -13,6 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libusb-1.0-0-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# ============ Install packages from source ===============
+RUN git clone https://github.com/crayzeewulf/libserial.git --branch 2acb0c4f394efd7ecad483b84e075c9d6cd82ebf /libserial
+RUN mkdir -p /libserial/build
+WORKDIR /libserial/build
+RUN cmake ..
+RUN make -j4
+RUN make install
+
 # ============ Install additional ROS2 packages ===============
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-eloquent-sophus \
