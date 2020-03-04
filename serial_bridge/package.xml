@@ -14,8 +14,10 @@
   
   <build_depend>project_settings</build_depend>
   <build_depend>acrobat_common</build_depend>
+  <build_depend>serial</build_depend>
 
   <exec_depend>acrobat_common</exec_depend>
+  <exec_depend>serial</exec_depend>
 
 
   <export>

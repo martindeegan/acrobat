@@ -4,8 +4,6 @@
 #include <string>
 #include <thread>
 
-#include <libserial/SerialPortConstants.h>
-#include <libserial/SerialStream.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/create_timer_ros.h>
@@ -13,6 +11,7 @@
 #include <tf2_ros/transform_listener.h>
 
 #include <acrobat_common/composition/visibility_control.hpp>
+#include <serial_bridge/encodings.hpp>
 
 using namespace std::chrono_literals;
 
@@ -31,9 +30,6 @@ class SerialBridge : public rclcpp::Node {
         auto parameter_client = std::make_shared<rclcpp::SyncParametersClient>(this);
         device_               = parameter_client->get_parameter<std::string>("device");
 
-        stream_.Open(device_);
-        stream_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
-
         // pose_buffer_   = std::make_shared<tf2_ros::Buffer>();
         // pose_listener_ = std::make_shared<tf2_ros::TransformListener>(*pose_buffer_);
 
@@ -42,7 +38,6 @@ class SerialBridge : public rclcpp::Node {
     }
 
     ~SerialBridge() {
-        stream_.Close();
     }
 
   private:
@@ -56,8 +51,6 @@ class SerialBridge : public rclcpp::Node {
             num_messages_ = 0;
             buffer_index_ = 1;
         }
-
-        stream_.write(temp_buffer.data(), buffer_size_);
     }
 
     void read() {
@@ -97,8 +90,7 @@ class SerialBridge : public rclcpp::Node {
         }
     }
 
-    std::string             device_;
-    LibSerial::SerialStream stream_;
+    std::string device_;
 
     constexpr static size_t        buffer_size_ = 256;
     char                           num_messages_;
