@@ -3,113 +3,90 @@
 #include <array>
 #include <memory>
 
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <boost/crc.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-// namespace acrobat::serial_bridge {
+namespace acrobat::serial_bridge {
 
-// using TransformStamped = geometry_msgs::msg::TransformStamped;
+constexpr size_t checksum_size         = sizeof(short);
+constexpr size_t end_of_message_length = sizeof(char);
+constexpr size_t buffer_size           = 256;
+using Buffer                           = std::array<char, buffer_size>;
 
-// constexpr size_t checksum_length = 32;
-// constexpr size_t buffer_size     = 256;
-// using Buffer                     = std::array<char, buffer_size>;
+// Templated message information
+template<class Message> struct message_information {
+    static constexpr char   id     = 0;
+    static constexpr size_t length = 0;
+};
 
-// // Templated message information
-// template<class Message> struct message_information {
-//     static constexpr char   id;
-//     static constexpr size_t length;
-// };
+template<> struct message_information<geometry_msgs::msg::TransformStamped> {
+    static constexpr char   id     = 0;
+    static constexpr size_t length = 8 * sizeof(double);
+};
 
-// // Encodes a message into a byte array
-// // data - the data to write the encoded bytes to
-// // msg - the ros message
-// // returns the size of the message in bytes
-// template<typename Message>
-// bool encode(Buffer buffer, Buffer::iterator& buffer_begin, typename std::shared_ptr<Message>
-// msg);
+// Compute CRC16 checksum
+short compute_checksum(const Buffer& buffer);
 
-// template<typename Message>
-// void encode_impl(Buffer                            buffer,
-//                  Buffer::iterator&                 buffer_begin,
-//                  typename std::shared_ptr<Message> msg);
+// Add checksum and end of message data
+void finalize_message(Buffer& buffer, Buffer::iterator buffer_begin);
 
-// // Decodes a message into its ros message type
-// // data - the data contained in the messsage
-// template<typename Message> Message decode(const char* data);
+// Check that the checksum matches the message contents
+bool check_message(const Buffer& buffer);
 
-// } // namespace acrobat::serial_bridge
+template<class Message>
+void encode_impl(Buffer::iterator         buffer_begin,
+                 Buffer::iterator         buffer_end,
+                 std::shared_ptr<Message> msg) {
+    // Empty implementation
+}
 
-// // Custom implementation for poses since they have dynamic sized frame names
-// template<>
-// bool acrobat::serial_bridge::encode<geometry_msgs::msg::TransformStamped>(
-//     Buffer                                                         buffer,
-//     Buffer::iterator&                                              buffer_begin,
-//     typename std::shared_ptr<geometry_msgs::msg::TransformStamped> msg) {
-//     const size_t message_length = message_information<TransformStamped>::length +
-//                                   msg->child_frame_id.size() + msg->header.frame_id.size();
-//     if (std::distance(buffer_begin, buffer.end()) < message_length)
-//         return false;
-//     // clang-format off
-//     // Transform structure
-//     // | id |  timestamp | rotation | translation | child_frame_name_length | child_frame_name |
-//     frame_name_length | frame_name |
-//     //clang-format on
+template<>
+void encode_impl(Buffer::iterator                                      buffer_begin,
+                 Buffer::iterator                                      buffer_end,
+                 std::shared_ptr<geometry_msgs::msg::TransformStamped> msg) {
+    std::array<double, 8> message_data;
 
-//     // Set message id
-//     *buffer_begin = message_information<TransformStamped>::id;
-//     buffer_begin++;
+    rclcpp::Time stamp(msg->header.stamp);
+    message_data[0] = stamp.seconds();
+    message_data[1] = msg->transform.rotation.w;
+    message_data[2] = msg->transform.rotation.x;
+    message_data[3] = msg->transform.rotation.y;
+    message_data[4] = msg->transform.rotation.z;
+    message_data[5] = msg->transform.translation.x;
+    message_data[6] = msg->transform.translation.y;
+    message_data[7] = msg->transform.translation.z;
 
-//     // Copy pose data into buffer
-//     std::array<double, message_information<TransformStamped>::length> message_data;
-//     rclcpp::Time                                                      stamp(msg->header.stamp);
-//     message_data[0] = stamp.seconds();
-//     message_data[1] = msg->transform.rotation.w;
-//     message_data[2] = msg->transform.rotation.x;
-//     message_data[3] = msg->transform.rotation.y;
-//     message_data[4] = msg->transform.rotation.z;
-//     message_data[5] = msg->transform.translation.x;
-//     message_data[6] = msg->transform.translation.y;
-//     message_data[7] = msg->transform.translation.z;
+    const char* message_bytes = reinterpret_cast<const char*>(message_data.data());
+    std::copy(message_bytes,
+              message_bytes + message_information<geometry_msgs::msg::TransformStamped>::length,
+              buffer_begin);
+}
 
-//     const char* encoded_bytes = reinterpret_cast<const char*>(message_data.data());
-//     std::copy(
-//         encoded_bytes, encoded_bytes + message_information<TransformStamped>::length,
-//         buffer_begin);
-//     buffer_begin += message_information<TransformStamped>::length;
+// Encodes a message into a byte array
+// data - the data to write the encoded bytes to
+// msg - the ros message
+// returns the size of the message in bytes
+template<class Message>
+bool encode(Buffer buffer, Buffer::iterator& buffer_begin, std::shared_ptr<Message> msg) {
+    // Typical message structure
+    // | id |  message data |
+    if (std::distance(buffer_begin, buffer.end()) < 1 + message_information<Message>::length)
+        return false;
 
-//     // copy child frame name
-//     *buffer_begin = static_cast<char>(msg->child_frame_id.size());
-//     buffer_begin++;
-//     std::copy(msg->child_frame_id.begin(), msg->child_frame_id.end(), buffer_begin);
+    *buffer_begin = message_information<Message>::id;
+    buffer_begin++;
+    auto buffer_end = buffer_begin + message_information<Message>::length;
+    encode_impl<Message>(buffer_begin, buffer_end, msg);
 
-//     // copy frame name
-//     *buffer_begin = static_cast<char>(msg->child_frame_id.size());
-//     buffer_begin++;
-//     std::copy(msg->child_frame_id.begin(), msg->child_frame_id.end(), buffer_begin);
-// }
+    buffer_begin = buffer_end;
 
-// template<typename Message>
-// bool acrobat::serial_bridge::encode(Buffer                            buffer,
-//                                     Buffer::iterator&                 buffer_begin,
-//                                     typename std::shared_ptr<Message> msg) {
-//     // clang-format off
-//     // Typical message structure
-//     // | id |  timestamp | rotation | translation | child_frame_name_length | child_frame_name |
-//     frame_name_length | frame_name |
-//     //clang-format on
+    return true;
+}
 
-//     if (std::distance(buffer_begin, buffer.end()) < 1 + message_information<Message>::length())
-//         return false;
+// Decodes a message into its ros message type
+// data - the data contained in the messsage
+template<typename Message> Message decode(const char* data) {
+}
 
-//     *buffer_begin = message_information<Message>::id();
-//     buffer_begin++;
-//     encode_impl(buffer, buffer_begin, msg);
-
-//     return true;
-// }
-
-// template<>
-// struct acrobat::serial_bridge::message_information<geometry_msgs::msg::TransformStamped> {
-//     static constexpr char   id     = 0;
-//     static constexpr size_t length = 8 * sizeof(double);
-// };
+} // namespace acrobat::serial_bridge
