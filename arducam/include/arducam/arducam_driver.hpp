@@ -29,13 +29,14 @@ class ArducamDriver : public rclcpp::Node {
 
     void configBoard(const Config& config);
 
-    void captureImage_callback();
+    void capture_image();
+    void read_image();
 
-    void convert_frame_to_message(uint8_t*                 frame_data,
-                                  size_t                   frame_id,
-                                  sensor_msgs::msg::Image& msg);
+    sensor_msgs::msg::Image msg;
 
-    rclcpp::TimerBase::SharedPtr timer_;
+    std::mutex                   read_mutex_;
+    rclcpp::TimerBase::SharedPtr capture_timer_;
+    rclcpp::TimerBase::SharedPtr read_timer_;
 };
 
 } // namespace acrobat::arducam
