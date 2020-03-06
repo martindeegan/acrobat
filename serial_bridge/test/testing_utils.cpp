@@ -2,10 +2,11 @@
 
 namespace testing_utils {
 
-Buffer create_buffer(std::string contents) {
-    Buffer buffer{0};
-    auto   buffer_begin = buffer.begin() + checksum_size;
-    std::copy(contents.begin(), contents.end(), buffer_begin);
+Buffer create_buffer(const char* contents, size_t length) {
+    Buffer buffer;
+    buffer.fill('a');
+    auto buffer_begin = buffer.begin() + checksum_size;
+    std::copy(contents, contents + length, buffer_begin);
     return buffer;
 }
 

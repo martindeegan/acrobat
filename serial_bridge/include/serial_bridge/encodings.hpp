@@ -42,9 +42,9 @@ void encode_impl(Buffer::iterator         buffer_begin,
 }
 
 template<>
-void encode_impl(Buffer::iterator                                      buffer_begin,
-                 Buffer::iterator                                      buffer_end,
-                 std::shared_ptr<geometry_msgs::msg::TransformStamped> msg) {
+inline void encode_impl(Buffer::iterator                                      buffer_begin,
+                        Buffer::iterator                                      buffer_end,
+                        std::shared_ptr<geometry_msgs::msg::TransformStamped> msg) {
     std::array<double, 8> message_data;
 
     rclcpp::Time stamp(msg->header.stamp);

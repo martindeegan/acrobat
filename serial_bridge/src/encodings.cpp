@@ -6,7 +6,7 @@ namespace acrobat::serial_bridge {
 
 short compute_checksum(const Buffer& buffer) {
     // USB crc16
-    boost::crc_optimal<16, 0x8005, 0xFFFF, 0, true, true> result;
+    boost::crc_optimal<16, 0x8005, 0xFFFF, 0xFFFF, true, true> result;
     result.process_bytes(buffer.data() + checksum_size, buffer_size - checksum_size);
     return result.checksum();
 }

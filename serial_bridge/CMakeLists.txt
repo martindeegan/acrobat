@@ -42,10 +42,10 @@ if(BUILD_TESTING)
   ament_target_dependencies(serial_bridge_test_utils "project_settings")
   target_link_libraries(serial_bridge_test_utils serial_bridge)
 
-  ament_add_gtest(test_checksum test/test_checksum.cpp)
-  set_target_properties(test_checksum PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
-  ament_target_dependencies(test_checksum "project_settings")
-  target_link_libraries(test_checksum serial_bridge serial_bridge_test_utils)
+  ament_add_gtest(test_finalize_message test/test_finalize_message.cpp)
+  set_target_properties(test_finalize_message PROPERTIES CXX_CLANG_TIDY "" CMAKE_CXX_CPPCHECK "")
+  ament_target_dependencies(test_finalize_message "project_settings")
+  target_link_libraries(test_finalize_message serial_bridge serial_bridge_test_utils)
 
 endif()
 
