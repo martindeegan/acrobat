@@ -20,7 +20,10 @@ using namespace std::chrono_literals;
 namespace acrobat::arducam {
 ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam_driver", options) {
     declare_parameter("config_name");
-    declare_parameter("camera_delay");
+    declare_parameter("camera_frequency");
+    declare_parameter("capture_speedup_factor");
+    declare_parameter("read_speedup_factor");
+
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this);
 
     while (!parameters_client->wait_for_service(1s)) {
@@ -34,7 +37,7 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     const auto config_name = parameters_client->get_parameter<std::string>("config_name");
     const auto config_filepath =
         ament_index_cpp::get_package_share_directory("arducam") + "/config/" + config_name;
-    RCLCPP_ERROR(get_logger(), "Loading config file from %s", config_filepath.c_str());
+    RCLCPP_INFO(get_logger(), "Loading config file from %s", config_filepath.c_str());
 
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
@@ -57,11 +60,18 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     }
     RCLCPP_INFO(get_logger(), "Capture began, rtn_val = %zd\n", rtn_val);
 
-    const auto camera_delay = parameters_client->get_parameter<double>("camera_delay");
-    capture_timer_          = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay),
-                                       std::bind(&ArducamDriver::capture_image, this));
-    read_timer_ = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay / 8.0),
-                                    std::bind(&ArducamDriver::read_image, this));
+    const auto camera_frequency = parameters_client->get_parameter<double>("camera_frequency");
+    const auto capture_speedup_factor =
+        parameters_client->get_parameter<double>("capture_speedup_factor");
+    const auto read_speedup_factor =
+        parameters_client->get_parameter<double>("read_speedup_factor");
+
+    const double camera_period  = 1.0 / camera_frequency;
+    const double read_period    = camera_period / read_speedup_factor;
+    const double capture_period = camera_period / capture_speedup_factor;
+    read_timer_ = create_wall_timer(1s * read_period, std::bind(&ArducamDriver::read_image, this));
+    capture_timer_ =
+        create_wall_timer(1s * capture_period, std::bind(&ArducamDriver::capture_image, this));
 
     msg.height          = cameraCfg.u32Height;
     msg.width           = cameraCfg.u32Width;
@@ -82,6 +92,7 @@ ArducamDriver::~ArducamDriver() {
 }
 
 void ArducamDriver::capture_image() {
+    std::lock_guard<std::mutex> guard(read_mutex_);
     msg.header.stamp = rclcpp::Time();
     ArduCam_captureImage(cameraHandle);
 }
@@ -93,14 +104,13 @@ void ArducamDriver::read_image() {
 
         uint32_t rtn_val = ArduCam_readImage(cameraHandle, frameData);
         if (rtn_val == USB_CAMERA_NO_ERROR) {
-            static size_t frame_id = 0;
-            const size_t  size     = msg.height * msg.width;
+            const size_t size = msg.height * msg.width;
             msg.data =
                 std::vector<uint8_t>(frameData->pu8ImageData, frameData->pu8ImageData + size);
             publisher->publish(msg);
-            ArduCam_del(cameraHandle);
 
-            ++frame_id;
+            ArduCam_flush(cameraHandle);
+            ArduCam_del(cameraHandle);
         }
     }
 }

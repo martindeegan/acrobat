@@ -16,7 +16,9 @@ def generate_launch_description():
                 node_name='arducam_driver',
                 parameters=[{
                     'config_name': 'camera_register_config.cfg', 
-                    'camera_delay':18.5
+                    'camera_frequency': 50.0,
+                    'capture_speedup_factor': 2.0,
+                    'read_speedup_factor': 20.0
                 }]
             ),
             ComposableNode(
