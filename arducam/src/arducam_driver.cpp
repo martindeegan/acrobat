@@ -60,8 +60,8 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     const auto camera_delay = parameters_client->get_parameter<double>("camera_delay");
     capture_timer_          = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay),
                                        std::bind(&ArducamDriver::capture_image, this));
-    read_timer_ = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay / 4.0),
-                                    std::bind(&ArducamDriver::capture_image, this));
+    read_timer_ = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay / 8.0),
+                                    std::bind(&ArducamDriver::read_image, this));
 
     msg.height          = cameraCfg.u32Height;
     msg.width           = cameraCfg.u32Width;
