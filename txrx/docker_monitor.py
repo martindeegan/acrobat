@@ -28,6 +28,15 @@ class DockerMonitor:
         """ Construct the image name from a tag """
         return self.repository_name + ':' + tag
 
+    def clean(self):
+        tags = self.get_tags()
+        for tag in tags:
+            image_name = self.build_image_name(tag)
+            try:
+                self.client.images.remove(image_name, force=True)
+            except:
+                pass
+
     def check_image(self, tag):
         """ Check if image exists in the docker registry """
         image_name = self.build_image_name(tag)
@@ -37,6 +46,15 @@ class DockerMonitor:
         except:
             print('Image does not exist: {}'.format(image_name))
             return False
+
+    def check_image_local(self, tag):
+        tags = self.get_tags()
+        return (tag in tags)
+
+    def pull_image(self, tag):
+        image_name = self.build_image_name(tag)
+        image = self.client.images.pull(image_name)
+        return image
 
     def pull_image_if_not_exists(self, tag):
         """ Check if image has been pulled and pull if not. Returns an Image object """
@@ -59,7 +77,12 @@ class DockerMonitor:
         else:
             raise ValueError('No image or tag to run')
 
-        return self.client.containers.create(image_name, detach=True, name='acrobat')
+        return self.client.containers.create(image_name, 
+                                             privileged=True, 
+                                             detach=True, 
+                                             name='acrobat', 
+                                             volumes={'/dev/acrobat/fc': {'bind': '/dev/acrobat/fc', 'mode': 'rw'},
+                                                      '/dev/acrobat/radio': {'bind': '/dev/acrobat/radio', 'mode': 'rw'}})
 
     def run_and_monitor(self, container):
         """ Runs a container and monitors it until it exits. Blocks until container exits. """
@@ -70,6 +93,7 @@ class DockerMonitor:
         print('Monitoring container...')
         container.wait()
 
+        print('Container finished.')
         # Remove the container so we can start another with name "acrobat"
         container.remove()
         

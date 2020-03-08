@@ -33,4 +33,4 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
 
 COPY ./ros_entrypoint.sh /
 ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["ros2", "launch", "demo", "demo.launch.py"]
+CMD ["/bin/bash"]

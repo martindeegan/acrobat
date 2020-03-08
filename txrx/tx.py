@@ -21,7 +21,9 @@ def print_command_help(cmd, args, description):
 def print_help(args=None):
     print('===========================================================================================================')
     print('Commands:')
-    print_command_help('run', ['tag:optional'], 'Runs the given docker tag. If tag is not provided, runs :latest_arm64.')
+    print_command_help('run', ['tag:optional'], 'Runs the given docker tag. If tag is not provided, runs :latest.')
+    print_command_help('pull', ['tag:optional'], 'Pulls the given docker tag. If tag is not provided, pull :latest.')
+    print_command_help('clean', [], 'Removes all images from drone.')
     print_command_help('tags', [], 'Lists all tags available to run.')
     print_command_help('exit', [], 'Exits TX.')
     print_command_help('help', [], 'Print this message.')
@@ -44,8 +46,6 @@ def completer(text, state):
 def main(serial_id):
     port = SerialPort(serial_id)
     monitor = DockerMonitor()
-    global commands
-    commands = commands + monitor.get_tags()
 
     signal.signal(signal.SIGINT, signal_handler)
     print('Welcome to TX')
@@ -57,6 +57,8 @@ def main(serial_id):
     while True:
         user_input = input('#: ')
         tokens = user_input.split()
+        global commands
+        commands = commands + monitor.get_tags()
 
         if len(tokens) == 0:
             continue
@@ -66,30 +68,36 @@ def main(serial_id):
         if cmd == 'help':
             print_help()
         elif cmd == 'tags':
-            print('Possible tags: {}'.format(tags))
+            port.write(cmd)
         elif cmd == 'exit':
             break
         elif cmd == 'run':
-            tag = 'latest'
-            if len(tokens) > 1:
-                tag = tokens[1]
-
-            if not monitor.check_image(tag):
-                continue
-            
-            port.write(cmd + ' ' + tag)
-
-            if not port.check_ack():
-                print('Did not receive ack')
-                continue
-
-            if not port.check_succeeded(tries=20):
-                print('Failed to start container')
+            if len(tokens) < 2:
+                tag = 'latest'
             else:
-                print('Container started')
-
+                tag = tokens[1]
+            port.write(cmd + ' ' + tag)
+        elif cmd == 'pull':
+            if len(tokens) < 2:
+                tag = 'latest'
+            else:
+                tag = tokens[1]
+            port.write(cmd + ' ' + tag)
+        elif cmd == 'clean':
+            port.write(cmd)
         else:
             print('Unknown command: {}'.format(cmd))
+            continue
+
+        
+        while True:
+            msg = port.read()
+            if port.end_of_transmission_message in msg:
+                break
+            elif msg and msg.isspace():
+                continue
+            else:
+                print(msg)
 
     # Close port on exit
     port.close()
