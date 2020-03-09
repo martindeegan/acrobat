@@ -2,8 +2,6 @@
 import signal
 import sys
 import readline
-import os
-import time
 
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
@@ -60,7 +58,7 @@ def wait_for_end_of_message_or_print(port):
         elif msg == '':
             continue
         else:
-            print(msg.strip())    
+            print(msg.strip())
 
 def main(serial_id):
     port = SerialPort(serial_id)
