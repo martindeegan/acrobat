@@ -1,4 +1,6 @@
 /*
+https://github.com/okdshin/PicoSHA2
+
 The MIT License (MIT)
 Copyright (C) 2017 okdshin
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,7 +37,7 @@ namespace picosha2 {
 typedef unsigned long word_t;
 typedef unsigned char byte_t;
 
-static const size_t k_digest_size = 32;
+static constexpr size_t k_digest_size = 32;
 
 namespace detail {
 inline byte_t mask_8bit(byte_t x) {

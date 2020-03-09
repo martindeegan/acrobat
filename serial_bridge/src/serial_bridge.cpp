@@ -5,13 +5,14 @@
 #include <thread>
 
 #include <rclcpp/rclcpp.hpp>
+#include <serial/serial.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/create_timer_ros.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <acrobat_common/composition/visibility_control.hpp>
-#include <serial_bridge/encodings.hpp>
+#include <serial_bridge/buffer.hpp>
 
 using namespace std::chrono_literals;
 
@@ -25,36 +26,52 @@ class SerialBridge : public rclcpp::Node {
 
     SerialBridge(const rclcpp::NodeOptions& options) : Node("serial_bridge", options) {
         declare_parameter("device");
+        declare_parameter("baudrate");
 
         auto parameter_client = std::make_shared<rclcpp::SyncParametersClient>(this);
         device_               = parameter_client->get_parameter<std::string>("device");
+        baudrate_             = parameter_client->get_parameter<uint32_t>("baudrate");
+
+        serial_port_.setPort(device_);
+        serial_port_.setBaudrate(baudrate_);
+        serial_port_.open();
+
+        reset_buffer();
 
         write_timer_ = create_wall_timer(10ms, std::bind(&SerialBridge::write, this));
         read_timer_  = create_wall_timer(10ms, std::bind(&SerialBridge::read, this));
-
-        buffer_       = Buffer{0};
-        buffer_begin_ = buffer_.begin() + 2;
     }
 
     ~SerialBridge() {
+        serial_port_.close();
     }
 
   private:
+    void reset_buffer() {
+        clear_buffer(buffer_);
+        buffer_index_ = checksum_size;
+    }
+
     void write() {
+        std::lock_guard<std::mutex> guard(buffer_mutex_);
     }
 
     void read() {
+        uint8_t read_buffer[buffer_size];
+        serial_port_.read(read_buffer, buffer_size);
     }
 
     void transform_callback(geometry_msgs::msg::TransformStamped::SharedPtr msg) {
         std::lock_guard<std::mutex> guard(buffer_mutex_);
-        encode(buffer_, buffer_begin_, msg);
     }
 
-    std::string device_;
+    std::string    device_;
+    uint32_t       baudrate_;
+    serial::Serial serial_port_;
 
-    Buffer                       buffer_;
-    Buffer::iterator             buffer_begin_;
+    uint8_t* buffer_;
+    size_t   buffer_index_;
+
     std::mutex                   buffer_mutex_;
     rclcpp::TimerBase::SharedPtr write_timer_;
     rclcpp::TimerBase::SharedPtr read_timer_;

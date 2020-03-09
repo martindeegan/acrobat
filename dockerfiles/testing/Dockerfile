@@ -13,6 +13,7 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
     -DBUILD_TESTING=ON \
     -DENABLE_CPPCHECK=ON \
     -DENABLE_CLANG_TIDY=ON \
+    -DCMAKE_BUILD_TYPE=Debug \
     --packages-select project_settings
 
 RUN source "${ROS2_WS}/install/setup.bash" && \
@@ -23,6 +24,7 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
     --no-warn-unused-cli \
     -DBUILD_TESTING=ON \
     -DENABLE_CPPCHECK=OFF \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DENABLE_CLANG_TIDY=OFF
 
 # Run unit tests
