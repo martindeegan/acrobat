@@ -1,5 +1,6 @@
 import serial
 
+
 class SerialPort:
     def __init__(self, serial_port: str):
         """ Initializes the serial port. Requires the device path. """
