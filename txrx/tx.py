@@ -2,6 +2,8 @@
 import signal
 import sys
 import readline
+import os
+import time
 
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
@@ -50,6 +52,15 @@ def completer(text, state):
     else:
         return None
 
+def wait_for_end_of_message_or_print(port):
+    while True:
+        msg = port.read()
+        if port.end_of_transmission_message in msg:
+            break
+        elif msg == '':
+            continue
+        else:
+            print(msg.strip())    
 
 def main(serial_id):
     port = SerialPort(serial_id)
@@ -99,14 +110,7 @@ def main(serial_id):
             continue
 
         # Wait for and print all messages received from rx
-        while True:
-            msg = port.read()
-            if port.end_of_transmission_message in msg:
-                break
-            elif msg and msg.isspace():
-                continue
-            else:
-                print(msg)
+        wait_for_end_of_message_or_print(port)
 
     # Close port on exit
     port.close()

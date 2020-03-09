@@ -29,3 +29,17 @@ class SerialPort:
 
     def send_end_of_command(self):
         self.write(self.end_of_transmission_message)
+
+    @property
+    def ack_message(self):
+        return 'ACK'
+
+    def send_ack(self):
+        self.write(self.ack_message)
+
+    @property
+    def start_message(self):
+        return 'START'
+
+    def send_start(self):
+        self.write(self.start_message)

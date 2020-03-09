@@ -99,10 +99,8 @@ def main():
     monitor = DockerMonitor()
 
     print("Sending start up lights")
-    for _ in range(5):
-        port.write(
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        time.sleep(1)
+    port.send_start()
+    time.sleep(1)
     print("Done. Ready for user input")
 
     while True:
@@ -114,7 +112,6 @@ def main():
 
         cmd = tokens[0]
 
-        print('Received command {}'.format(user_input))
         if cmd == 'run':
             exec_run(port, monitor, tokens)
         elif cmd == 'pull':
