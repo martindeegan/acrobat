@@ -75,9 +75,7 @@ class DockerMonitor:
         return image
 
     def create_container(self, image=None, tag=None):
-        """Launch a container with either a tag or an image object.
-        This does not run the container. Returns a container object.
-        """
+        """Launch a container without starting it with a tag or an image object. Returns a container object."""
         if image is not None:
             image_name = image.tags[0]
         elif tag is not None:
