@@ -3,6 +3,7 @@
 import signal
 import sys
 import time
+import os
 
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
@@ -13,7 +14,7 @@ def main():
 
 
     print("Sending start up lights")
-    for i in range(5):
+    for _ in range(5):
         port.write("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         time.sleep(1)
     print("Done. Ready for user input")
@@ -91,6 +92,10 @@ def main():
             monitor.clean()
             port.write('Images successfully removed.')
             pass
+        elif cmd == 'reboot':
+            port.write('Rebooting')
+            port.send_end_of_command()
+            os.system("shutdown /r /t 1") 
         else:
             port.write('Unknown command: {}'.format(cmd))
 

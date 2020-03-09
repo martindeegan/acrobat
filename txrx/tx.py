@@ -25,6 +25,7 @@ def print_help(args=None):
     print_command_help('pull', ['tag:optional'], 'Pulls the given docker tag. If tag is not provided, pull :latest.')
     print_command_help('clean', [], 'Removes all images from drone.')
     print_command_help('tags', [], 'Lists all tags available to run.')
+    print_command_help('reboot', [], 'Restarts the acrobat computer.')
     print_command_help('exit', [], 'Exits TX.')
     print_command_help('help', [], 'Print this message.')
     print('===========================================================================================================')
@@ -84,6 +85,8 @@ def main(serial_id):
                 tag = tokens[1]
             port.write(cmd + ' ' + tag)
         elif cmd == 'clean':
+            port.write(cmd)
+        elif cmd == 'reboot':
             port.write(cmd)
         else:
             print('Unknown command: {}'.format(cmd))
