@@ -1,8 +1,6 @@
 # Serial port for receiving commands from control station through the SiK radio modules
 
 import time
-import os
-
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
 
@@ -31,7 +29,6 @@ def exec_pull(port, monitor, tokens):
 
 def run_and_monitor(self, port, container):
     """Runs a container and monitors it until it exits. Blocks until container exits."""
-
     container.start()
     port.write(
         '====================================================================')
