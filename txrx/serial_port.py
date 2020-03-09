@@ -1,8 +1,8 @@
 import serial
-import socket
 
 class SerialPort:
     def __init__(self, serial_port: str):
+        """ Initializes the serial port. Requires the device path. """
         self.port = serial.Serial(serial_port, 115200, timeout=3)
         print('Connected to serial port: {}'.format(self.port.name))
 

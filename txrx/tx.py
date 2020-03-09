@@ -52,7 +52,6 @@ def main(serial_id):
     print('Welcome to TX')
     print_help()
 
-
     readline.parse_and_bind("tab:complete")
     readline.set_completer(completer)
     while True:
@@ -92,7 +91,7 @@ def main(serial_id):
             print('Unknown command: {}'.format(cmd))
             continue
 
-        
+        # Wait for and print all messages received from rx
         while True:
             msg = port.read()
             if port.end_of_transmission_message in msg:
