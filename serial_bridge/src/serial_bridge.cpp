@@ -25,10 +25,12 @@ class SerialBridge : public rclcpp::Node {
     ACROBAT_COMPOSITION_PUBLIC
 
     SerialBridge(const rclcpp::NodeOptions& options) : Node("serial_bridge", options) {
+        declare_parameter("ground_station");
         declare_parameter("device");
         declare_parameter("baudrate");
 
         auto parameter_client = std::make_shared<rclcpp::SyncParametersClient>(this);
+        ground_station_       = parameter_client->get_parameter<bool>("ground_station");
         device_               = parameter_client->get_parameter<std::string>("device");
         baudrate_             = parameter_client->get_parameter<uint32_t>("baudrate");
 
@@ -38,8 +40,7 @@ class SerialBridge : public rclcpp::Node {
 
         reset_buffer();
 
-        write_timer_ = create_wall_timer(10ms, std::bind(&SerialBridge::write, this));
-        read_timer_  = create_wall_timer(10ms, std::bind(&SerialBridge::read, this));
+        handshake_timer_ = create_wall_timer(100ms, std::bind(&SerialBridge::handshake, this));
     }
 
     ~SerialBridge() {
@@ -47,6 +48,19 @@ class SerialBridge : public rclcpp::Node {
     }
 
   private:
+    void handshake() {
+        serial_port_.write("Handshake\n");
+        std::string response = serial_port_.readline();
+
+        if (response == "Handshake\n") {
+        }
+    }
+
+    void initialize_timers() {
+        write_timer_ = create_wall_timer(20ms, std::bind(&SerialBridge::write, this));
+        read_timer_  = create_wall_timer(20ms, std::bind(&SerialBridge::read, this));
+    }
+
     void reset_buffer() {
         clear_buffer(buffer_);
         buffer_index_ = checksum_size;
@@ -54,6 +68,7 @@ class SerialBridge : public rclcpp::Node {
 
     void write() {
         std::lock_guard<std::mutex> guard(buffer_mutex_);
+        serial_port_.write(buffer_, buffer_size);
     }
 
     void read() {
@@ -65,14 +80,16 @@ class SerialBridge : public rclcpp::Node {
         std::lock_guard<std::mutex> guard(buffer_mutex_);
     }
 
-    std::string    device_;
-    uint32_t       baudrate_;
-    serial::Serial serial_port_;
+    bool ground_station_;
 
-    uint8_t* buffer_;
-    size_t   buffer_index_;
+    std::string                  device_;
+    uint32_t                     baudrate_;
+    serial::Serial               serial_port_;
+    rclcpp::TimerBase::SharedPtr handshake_timer_;
 
     std::mutex                   buffer_mutex_;
+    uint8_t*                     buffer_;
+    size_t                       buffer_index_;
     rclcpp::TimerBase::SharedPtr write_timer_;
     rclcpp::TimerBase::SharedPtr read_timer_;
 };

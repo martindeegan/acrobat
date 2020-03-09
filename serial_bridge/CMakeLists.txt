@@ -5,7 +5,7 @@ project(serial_bridge)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
-# find_package(serial REQUIRED)
+find_package(serial REQUIRED)
 
 # find project dependencies
 find_package(project_settings REQUIRED)
@@ -13,7 +13,7 @@ find_package(acrobat_common REQUIRED)
 
 add_library(serial_bridge SHARED src/serial_bridge.cpp src/buffer.cpp)
 target_compile_definitions(serial_bridge PRIVATE "COMPOSITION_BUILDING_DLL")
-ament_target_dependencies(serial_bridge "rclcpp" "rclcpp_components" "project_settings" "acrobat_common")
+ament_target_dependencies(serial_bridge "rclcpp" "rclcpp_components" "project_settings" "acrobat_common" "serial")
 rclcpp_components_register_nodes(serial_bridge "acrobat::serial_bridge::SerialBridge")
 target_include_directories(serial_bridge PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                                 "$<INSTALL_INTERFACE:include>")
