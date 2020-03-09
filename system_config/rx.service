@@ -1,0 +1,14 @@
+[Unit]
+Description=Launches RX
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 rx.py
+WorkingDirectory=/home/acrobat/txrx
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=acrobat
+
+[Install]
+WantedBy=multi-user.target
