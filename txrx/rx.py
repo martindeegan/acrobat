@@ -2,6 +2,7 @@
 
 import signal
 import sys
+import time
 
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
@@ -9,6 +10,13 @@ from docker_monitor import DockerMonitor
 def main():
     port = SerialPort("/dev/acrobat/radio")
     monitor = DockerMonitor()
+
+
+    print("Sending start up lights")
+    for i in range(5):
+        port.write("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        time.sleep(1)
+    print("Done. Ready for user input")
 
     while True:
         user_input = port.read()
