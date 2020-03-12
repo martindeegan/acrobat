@@ -24,6 +24,7 @@ Fast autonomous flight
 
 ### Requirements
 - Ubuntu 18.04
+- CMake 3.15+
 
 ### Install Docker
 The acrobat software runs in a docker container on the vehicle instead of running natively on the Jetson. To build docker containers you need to install Docker. [Installation Guide](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04).
