@@ -4,6 +4,8 @@ Fast autonomous flight
 
 ## Hardware
 
+![](images/acrobat.jpg)
+
 - Nvidia Jetson TX2
 - Auvidea J120 Carrier Board
   - mpu9250 IMU
