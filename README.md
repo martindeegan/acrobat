@@ -1,7 +1,7 @@
 # ACROBAT
 
-![CI](https://github.com/martindeegan/acrobat/workflows/CI/badge.svg?branch=master)
-![CD](https://github.com/martindeegan/acrobat/workflows/CD/badge.svg?branch=master)
+![Build ARM64](https://github.com/martindeegan/acrobat/workflows/deploy_arm64/badge.svg?branch=master)
+![Build x86-64](https://github.com/martindeegan/acrobat/workflows/deploy_x86_64/badge.svg?branch=master)
 
 Fast autonomous flight
 
