@@ -1,5 +1,8 @@
 # ACROBAT
 
+![CI](https://github.com/martindeegan/acrobat/workflows/CI/badge.svg?branch=master)
+![CD](https://github.com/martindeegan/acrobat/workflows/CD/badge.svg?branch=master)
+
 Fast autonomous flight
 
 ## Hardware
@@ -12,7 +15,7 @@ Fast autonomous flight
 - Arducam [AR0135 Mono Camera](https://www.arducam.com/product/ar0135-1-2mp-monochrome-1-3-inch-cmos-camera-module-arducam/) + [USB3.0 shield](https://www.arducam.com/arducam-usb3-0-camera-shield/)
 - Betaflight flight controller (or any other MSP capable flight controller)
   -  [CLRacingF4](https://www.getfpv.com/cl-racing-f4s-flight-controller.html)
-  -  Flashed with custom betaflight firmware which enables MSP on UART4 [acrobat_mod branch](https://github.com/martindeegan/betaflight)
+  -  Flashed with custom betaflight firmware which enables MSP on UART4: [acrobat_mod branch](https://github.com/martindeegan/betaflight)
 -  Other drone components
    -  Frame - [Lumenier QAV-R 2](https://www.getfpv.com/lumenier-qav-r-2-freestyle-quadcopter-frame.html)
    -  Motors - [Armattan Oomph Titan 2306/2450kv](https://armattanquads.com/armattan-oomph-titan-edition-2306-2450-kv-motor/)
