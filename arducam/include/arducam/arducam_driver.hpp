@@ -19,21 +19,21 @@ class ArducamDriver : public rclcpp::Node {
     ~ArducamDriver();
 
   private:
-    ArduCamCfg     cameraCfg;
-    ArduCamHandle  cameraHandle;
-    struct termios oldt, newt;
+    bool camera_init(const std::string& filename);
 
-    std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
+    void configure_board(const Config& config);
 
-    bool cameraInit(const std::string& filename);
-
-    void configBoard(const Config& config);
-
-    void captureImage_callback();
+    void capture_image();
 
     void convert_frame_to_message(uint8_t*                 frame_data,
                                   size_t                   frame_id,
                                   sensor_msgs::msg::Image& msg);
+
+    ArduCamCfg     camera_config_;
+    ArduCamHandle  camera_handle_;
+    struct termios oldt, newt;
+
+    std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
 
     rclcpp::TimerBase::SharedPtr timer_;
 };
