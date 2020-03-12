@@ -19,6 +19,7 @@ jobs:
         run: |
           docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
 
+          make pull_latest_x86_64
           make build_dependencies_x86_64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
                                          FROM_TAG=latest \
                                          CACHE_TAG=latest
@@ -41,6 +42,7 @@ jobs:
         run: |
           docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
 
+          make pull_latest_arm64
           make build_dependencies_arm64 TAG=${GITHUB_REF##*/}_${GITHUB_RUN_NUMBER} \
                                          FROM_TAG=latest \
                                          CACHE_TAG=latest

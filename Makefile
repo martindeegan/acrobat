@@ -64,12 +64,22 @@ pull_latest:
 	docker pull martindeegan/acrobat:latest_runtime_x86_64
 	docker pull martindeegan/acrobat:latest_base_arm64
 	docker pull martindeegan/acrobat:latest_dependencies_arm64
-	docker pull martindeegan/acrobat:latest_runtime_arm64
+	docker pull martindeegan/acrobat:latest_runtime_arm64 
 
-tag_latest_devel:
-	docker tag martindeegan/acrobat:latest_base_x86_64 martindeegan/acrobat:${USER}_devel_base_x86_64
-	docker tag martindeegan/acrobat:latest_dependencies_x86_64 martindeegan/acrobat:${USER}_devel_dependencies_x86_64
-	docker tag martindeegan/acrobat:latest_runtime_x86_64 martindeegan/acrobat:${USER}_devel_runtime_x86_64
-	docker tag martindeegan/acrobat:latest_base_arm64 martindeegan/acrobat:${USER}_devel_base_arm64
-	docker tag martindeegan/acrobat:latest_dependencies_arm64 martindeegan/acrobat:${USER}_devel_dependencies_arm64
-	docker tag martindeegan/acrobat:latest_runtime_arm64 martindeegan/acrobat:${USER}_devel_runtime_arm64
+pull_latest_arm64:
+	docker pull martindeegan/acrobat:latest_base_arm64
+	docker pull martindeegan/acrobat:latest_dependencies_arm64
+	docker pull martindeegan/acrobat:latest_runtime_arm64 
+
+pull_latest_x86_64:
+	docker pull martindeegan/acrobat:latest_base_x86_64
+	docker pull martindeegan/acrobat:latest_dependencies_x86_64
+	docker pull martindeegan/acrobat:latest_runtime_x86_64
+
+tag_latest:
+	docker tag martindeegan/acrobat:latest_base_x86_64 martindeegan/acrobat:${TAG}_base_x86_64
+	docker tag martindeegan/acrobat:latest_dependencies_x86_64 martindeegan/acrobat:${TAG}_dependencies_x86_64
+	docker tag martindeegan/acrobat:latest_runtime_x86_64 martindeegan/acrobat:${TAG}_runtime_x86_64
+	docker tag martindeegan/acrobat:latest_base_arm64 martindeegan/acrobat:${TAG}_base_arm64
+	docker tag martindeegan/acrobat:latest_dependencies_arm64 martindeegan/acrobat:${TAG}_dependencies_arm64
+	docker tag martindeegan/acrobat:latest_runtime_arm64  martindeegan/acrobat:${TAG}_runtime_arm64
