@@ -43,9 +43,7 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
         rclcpp::shutdown();
     }
 
-    rclcpp::sleep_for(1s);
-
-    ArduCam_setMode(camera_handle_, CONTINUOUS_MODE);
+    publisher = create_publisher<sensor_msgs::msg::Image>("/acrobat/camera", 10);
 
     uint32_t rtn_val = ArduCam_beginCaptureImage(camera_handle_);
     if (rtn_val == USB_CAMERA_USB_TASK_ERROR) {
@@ -53,13 +51,20 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
         rclcpp::shutdown();
     }
 
-    publisher = create_publisher<sensor_msgs::msg::Image>("/acrobat/camera", 10);
+    msg_.height          = camera_config_.u32Height;
+    msg_.width           = camera_config_.u32Width;
+    msg_.is_bigendian    = false;
+    msg_.header.frame_id = "acrobat_camera";
+    msg_.encoding        = sensor_msgs::image_encodings::TYPE_8UC1; // opencv type
+    image_size_          = msg_.height * msg_.width;
 
     RCLCPP_INFO(get_logger(), "Starting capture");
     capture_thread_ = std::thread(&ArducamDriver::capture_image, this);
 }
 
 ArducamDriver::~ArducamDriver() {
+    capture_thread_.join();
+
     ArduCam_endCaptureImage(camera_handle_);
     ArduCam_close(camera_handle_);
 
@@ -180,6 +185,10 @@ bool ArducamDriver::camera_init(const std::string& filename) {
         return false;
     }
 
+    rclcpp::sleep_for(1s);
+
+    ArduCam_setMode(camera_handle_, CONTINUOUS_MODE);
+
     return true;
 }
 
@@ -196,19 +205,6 @@ void ArducamDriver::configure_board(const Config& config) {
                            u8Buf);
 }
 
-void ArducamDriver::convert_frame_to_message(uint8_t*                 frame_data,
-                                             size_t                   frame_id,
-                                             sensor_msgs::msg::Image& msg) {
-    // copy cv information into ros message
-    msg.height          = camera_config_.u32Height;
-    msg.width           = camera_config_.u32Width;
-    msg.is_bigendian    = false;
-    size_t size         = msg.height * msg.width;
-    msg.data            = std::vector<uint8_t>(frame_data, frame_data + size);
-    msg.header.frame_id = std::to_string(frame_id);
-    msg.encoding        = sensor_msgs::image_encodings::TYPE_8UC1; // opencv type
-}
-
 void ArducamDriver::capture_image() {
     ArduCamOutData* frameData;
     while (rclcpp::ok()) {
@@ -222,9 +218,9 @@ void ArducamDriver::capture_image() {
         uint32_t rtn_val = ArduCam_readImage(camera_handle_, frameData);
         if (rtn_val == USB_CAMERA_NO_ERROR) {
             static size_t frame_id = 0;
-            auto          msg      = std::make_unique<sensor_msgs::msg::Image>();
-            convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
-            publisher->publish(std::move(msg));
+            msg_.data              = std::vector<uint8_t>(frameData->pu8ImageData,
+                                             frameData->pu8ImageData + image_size_);
+            publisher->publish(msg_);
             ArduCam_del(camera_handle_);
 
             ++frame_id;

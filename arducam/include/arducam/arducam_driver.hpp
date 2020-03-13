@@ -25,16 +25,14 @@ class ArducamDriver : public rclcpp::Node {
 
     void capture_image();
 
-    void convert_frame_to_message(uint8_t*                 frame_data,
-                                  size_t                   frame_id,
-                                  sensor_msgs::msg::Image& msg);
-
     struct termios oldt, newt;
 
     ArduCamCfg    camera_config_;
     ArduCamHandle camera_handle_;
 
     std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
+    size_t                                                      image_size_;
+    sensor_msgs::msg::Image                                     msg_;
 
     double      capture_frequency_;
     std::thread capture_thread_;
