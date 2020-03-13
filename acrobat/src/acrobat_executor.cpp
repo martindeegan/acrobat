@@ -12,7 +12,8 @@ namespace {
 
 class AcrobatParameters : public rclcpp::Node {
   public:
-    AcrobatParameters(const rclcpp::NodeOptions& options) : Node("acrobat_parameters", options) {
+    explicit AcrobatParameters(const rclcpp::NodeOptions& options)
+        : Node("acrobat_parameters", options) {
         declare_parameter<bool>("use_arducam", false);
         declare_parameter<bool>("use_image_viewer", false);
         declare_parameter<bool>("use_msp_bridge", false);
