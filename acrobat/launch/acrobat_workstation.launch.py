@@ -12,9 +12,9 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
             parameters=[{
-                'use_arducam': True,
+                'use_arducam': False,
                 'use_image_viewer': True,
-                'use_msp_bridge': True
+                'use_msp_bridge': False
             },
                 #  Arducam driver configuration
                 {
