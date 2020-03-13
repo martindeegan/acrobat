@@ -1,4 +1,4 @@
 builtin_interfaces/Time stamp
 
-geometry_msgs/Vector3 angular_velocity
-float64 thrust
+float32[3] angular_velocity
+float32 thrust
