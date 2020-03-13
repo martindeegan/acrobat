@@ -27,16 +27,22 @@ def exec_pull(port, monitor, tokens):
         port.write("Image was not pulled successfully.")
 
 
-def run_and_monitor(self, port, container):
+def run_and_monitor(port, container):
     """Runs a container and monitors it until it exits. Blocks until container exits."""
-    container.start()
     port.write(
-        '====================================================================')
+        '=======================================================================================================================================================================')
     port.write('Launching container {}, id: {}'.format(
         container.image, container.id))
-    port.write('Monitoring container...')
+    port.write(
+        '=======================================================================================================================================================================')
+    port.write('Port closing. Monitoring container.')
+    time.sleep(1)
+    port.close()
+    container.start()
     container.wait()
-    port.write('Container finished.')
+    port.open()
+    time.sleep(1)
+    port.write('Container finished execution. Port opened!')
 
     # Remove the container so we can start another with name "acrobat"
     container.remove()
@@ -59,7 +65,7 @@ def exec_run(port, monitor, tokens):
 
         return
 
-    port.write('Starting container. Port closing...')
+    port.write('Creating container.')
 
     try:
         container = monitor.create_container(tag=tag)
@@ -68,11 +74,9 @@ def exec_run(port, monitor, tokens):
         port.write(str(ex))
         return
 
-    # Close the port so the container can use it. Reopen when it closes
-    port.close()
-    monitor.run_and_monitor(container)
-    port.open()
-    port.write('Container finished execution. Port opened.')
+    port.write('Container created.')
+
+    run_and_monitor(port, container)
 
 
 def exec_tags(port, monitor):

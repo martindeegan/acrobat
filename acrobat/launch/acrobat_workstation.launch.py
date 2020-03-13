@@ -13,7 +13,7 @@ def generate_launch_description():
             emulate_tty=True,
             parameters=[{
                 'use_arducam': True,
-                'use_image_viewer': False,
+                'use_image_viewer': True,
                 'use_msp_bridge': True
             },
                 #  Arducam driver configuration
@@ -23,8 +23,8 @@ def generate_launch_description():
             },
                 #  MSP Bridge configuration
                 {
-                'device': '/dev/acrobat/fc',
-                'baudrate': 500000,
+                'device': '/dev/ttyACM0',
+                'baudrate': 115200,
                 'imu_frequency': 100.0,
                 'motor_frequency': 100.0
             }

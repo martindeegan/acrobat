@@ -21,4 +21,4 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
 
 COPY ./ros_entrypoint.sh /
 ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["/bin/bash"]
+CMD ["ros2", "launch", "acrobat", "acrobat.launch.py"]

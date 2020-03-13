@@ -6,12 +6,18 @@ import readline
 from serial_port import SerialPort
 from docker_monitor import DockerMonitor
 
+global tags
+global commands
+commands = []
+
 
 def signal_handler(signal, frame):
     pass
 
 
 def print_command_help(cmd, args, description):
+    global commands
+    commands.append(cmd)
     msg = cmd + ' '
     for arg in args:
         msg += '<{}>'.format(arg)
@@ -35,11 +41,6 @@ def print_help(args=None):
     print('===========================================================================================================')
 
 
-global tags
-global commands
-commands = ['exit', 'help', 'tags', 'run ']
-
-
 def completer(text, state):
     global commands
 
@@ -50,6 +51,7 @@ def completer(text, state):
     else:
         return None
 
+
 def wait_for_end_of_message_or_print(port):
     while True:
         msg = port.read()
@@ -59,6 +61,7 @@ def wait_for_end_of_message_or_print(port):
             continue
         else:
             print(msg.strip())
+
 
 def main(serial_id):
     port = SerialPort(serial_id)

@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional packages from source ===============
-RUN git clone https://github.com/martindeegan/msp.git "${ROS2_WS}/src/msp"
+RUN git clone --branch acrobat_mod https://github.com/martindeegan/msp.git "${ROS2_WS}/src/msp"
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \

@@ -21,9 +21,13 @@ MspBridge::MspBridge(const rclcpp::NodeOptions& options) : Node("msp_bridge", op
 
     auto parameter_client = std::make_shared<rclcpp::SyncParametersClient>(this);
 
-    device_   = parameter_client->get_parameter<std::string>("device");
-    baudrate_ = parameter_client->get_parameter<size_t>("baudrate");
-    msp_client_.start(device_, baudrate_);
+    device_      = parameter_client->get_parameter<std::string>("device");
+    baudrate_    = parameter_client->get_parameter<size_t>("baudrate");
+    bool success = msp_client_.start(device_, baudrate_);
+    if (!success) {
+        RCLCPP_ERROR(get_logger(), "Could not connect to flight controller through MSP.");
+        rclcpp::shutdown();
+    }
 
     imu_pub_     = create_publisher<sensor_msgs::msg::Imu>("/acrobat/fc_imu", 2);
     motor_pub_   = create_publisher<acrobat_msgs::msg::BetaflightMotor>("/acrobat/motors", 2);

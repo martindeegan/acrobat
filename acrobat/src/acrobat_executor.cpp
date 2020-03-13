@@ -32,11 +32,11 @@ int main(int argc, char** argv) {
 
     bool use_arducam      = parameter_client->get_parameter<bool>("use_arducam");
     bool use_image_viewer = parameter_client->get_parameter<bool>("use_image_viewer");
-    bool use_msp_bridge   = parameter_client->get_parameter<bool>("use_image_viewer");
+    bool use_msp_bridge   = parameter_client->get_parameter<bool>("use_msp_bridge");
 
-    std::shared_ptr<acrobat::arducam::ArducamDriver>    arducam_driver;
-    std::shared_ptr<acrobat::image_viewer::ImageViewer> image_viewer;
-    std::shared_ptr<acrobat::msp_bridge::MspBridge>     msp_bridge;
+    std::shared_ptr<acrobat::arducam::ArducamDriver>    arducam_driver = nullptr;
+    std::shared_ptr<acrobat::image_viewer::ImageViewer> image_viewer   = nullptr;
+    std::shared_ptr<acrobat::msp_bridge::MspBridge>     msp_bridge     = nullptr;
 
     if (use_arducam) {
         arducam_driver = std::make_shared<acrobat::arducam::ArducamDriver>(options);
