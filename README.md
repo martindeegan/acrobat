@@ -2,6 +2,7 @@
 
 ![Build ARM64](https://github.com/martindeegan/acrobat/workflows/deploy_arm64/badge.svg?branch=master)
 ![Build x86-64](https://github.com/martindeegan/acrobat/workflows/deploy_x86_64/badge.svg?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3cb07cd60e2d4446b473e3a3792a6bc5)](https://www.codacy.com/manual/martindeegan/acrobat?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=martindeegan/acrobat&amp;utm_campaign=Badge_Grade)
 
 Fast autonomous flight
 
