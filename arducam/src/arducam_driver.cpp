@@ -20,13 +20,13 @@ using namespace std::chrono_literals;
 namespace acrobat::arducam {
 ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam_driver", options) {
     declare_parameter("config_name");
-    declare_parameter("camera_delay");
+    declare_parameter("capture_frequency");
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(this);
 
     while (!parameters_client->wait_for_service(1s)) {
         if (!rclcpp::ok()) {
-            RCLCPP_INFO(this->get_logger(),
-                        "Interrupted while waiting for the parameters client. Exiting.");
+            RCLCPP_ERROR(this->get_logger(),
+                         "Interrupted while waiting for the parameters client. Exiting.");
             rclcpp::shutdown();
         }
     }
@@ -34,12 +34,9 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     const auto config_name = parameters_client->get_parameter<std::string>("config_name");
     const auto config_filepath =
         ament_index_cpp::get_package_share_directory("arducam") + "/config/" + config_name;
-    RCLCPP_ERROR(get_logger(), "Loading config file from %s", config_filepath.c_str());
+    RCLCPP_INFO(get_logger(), "Loading config file from %s", config_filepath.c_str());
 
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    capture_frequency_ = parameters_client->get_parameter<double>("capture_frequency");
 
     if (!camera_init(config_filepath)) {
         RCLCPP_ERROR(get_logger(), "Failed to initialize the camera driver");
@@ -53,14 +50,13 @@ ArducamDriver::ArducamDriver(const rclcpp::NodeOptions& options) : Node("arducam
     uint32_t rtn_val = ArduCam_beginCaptureImage(camera_handle_);
     if (rtn_val == USB_CAMERA_USB_TASK_ERROR) {
         RCLCPP_ERROR(get_logger(), "Error beginning capture, rtn_val = %zd", rtn_val);
+        rclcpp::shutdown();
     }
 
-    RCLCPP_INFO(get_logger(), "Beginning capture");
+    publisher = create_publisher<sensor_msgs::msg::Image>("/acrobat/camera", 10);
 
-    publisher               = create_publisher<sensor_msgs::msg::Image>("/acrobat/camera", 10);
-    const auto camera_delay = parameters_client->get_parameter<double>("camera_delay");
-    timer_                  = create_wall_timer(duration<double, std::ratio<1, 1000>>(camera_delay),
-                               std::bind(&ArducamDriver::capture_image, this));
+    RCLCPP_INFO(get_logger(), "Starting capture");
+    capture_thread_ = std::thread(&ArducamDriver::capture_image, this);
 }
 
 ArducamDriver::~ArducamDriver() {
@@ -71,6 +67,11 @@ ArducamDriver::~ArducamDriver() {
 }
 
 bool ArducamDriver::camera_init(const std::string& filename) {
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
     CameraConfigs cam_cfgs;
     memset(&cam_cfgs, 0x00, sizeof(CameraConfigs));
     if (arducam_parse_config(filename.c_str(), &cam_cfgs)) {
@@ -210,18 +211,24 @@ void ArducamDriver::convert_frame_to_message(uint8_t*                 frame_data
 
 void ArducamDriver::capture_image() {
     ArduCamOutData* frameData;
+    while (rclcpp::ok()) {
+        ArduCam_captureImage(camera_handle_);
 
-    ArduCam_captureImage(camera_handle_);
+        // Wait for the image to become available
+        while (!ArduCam_availableImage(camera_handle_)) {
+            rclcpp::sleep_for(10ms);
+        }
 
-    uint32_t rtn_val = ArduCam_readImage(camera_handle_, frameData);
-    if (rtn_val == USB_CAMERA_NO_ERROR) {
-        static size_t frame_id = 0;
-        auto          msg      = std::make_unique<sensor_msgs::msg::Image>();
-        convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
-        publisher->publish(std::move(msg));
-        ArduCam_del(camera_handle_);
+        uint32_t rtn_val = ArduCam_readImage(camera_handle_, frameData);
+        if (rtn_val == USB_CAMERA_NO_ERROR) {
+            static size_t frame_id = 0;
+            auto          msg      = std::make_unique<sensor_msgs::msg::Image>();
+            convert_frame_to_message(frameData->pu8ImageData, frame_id, *msg);
+            publisher->publish(std::move(msg));
+            ArduCam_del(camera_handle_);
 
-        ++frame_id;
+            ++frame_id;
+        }
     }
 }
 

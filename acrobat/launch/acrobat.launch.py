@@ -12,6 +12,9 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
             parameters=[
-                {'config_name': 'camera_register_config.cfg', 'camera_delay': 18.5}]
+                {'use_arducam': True,
+                 'use_image_viewer': True,
+                 'config_name': 'camera_register_config.cfg',
+                 'capture_frequency': 10.0}]
         )
     ])

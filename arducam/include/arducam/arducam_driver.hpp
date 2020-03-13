@@ -29,13 +29,15 @@ class ArducamDriver : public rclcpp::Node {
                                   size_t                   frame_id,
                                   sensor_msgs::msg::Image& msg);
 
-    ArduCamCfg     camera_config_;
-    ArduCamHandle  camera_handle_;
     struct termios oldt, newt;
+
+    ArduCamCfg    camera_config_;
+    ArduCamHandle camera_handle_;
 
     std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::Image>> publisher;
 
-    rclcpp::TimerBase::SharedPtr timer_;
+    double      capture_frequency_;
+    std::thread capture_thread_;
 };
 
 } // namespace acrobat::arducam
