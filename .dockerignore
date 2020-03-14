@@ -7,3 +7,9 @@ Makefile
 .github
 txrx
 system_config
+.git
+.cache
+README.md
+txrx
+images
+dockerfiles

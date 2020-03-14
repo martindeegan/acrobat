@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional packages from source ===============
+WORKDIR ${ROS2_WS}
 RUN git clone --branch acrobat_mod https://github.com/martindeegan/msp.git "${ROS2_WS}/src/msp"
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
@@ -39,3 +40,11 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_TESTS=OFF
+
+RUN git clone --branch acrobat_mod https://github.com/martindeegan/RTIMULib2.git /rtimulib
+WORKDIR /rtimulib
+RUN cmake RTIMULib && make -j4 && make install
+WORKDIR /
+RUN rm -rf /rtimulib
+
+WORKDIR ${ROS2_WS}

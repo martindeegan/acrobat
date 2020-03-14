@@ -7,6 +7,7 @@ COPY ./ ${ROS2_WS}/src/acrobat
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \
+    --packages-select acrobat_imu project_settings \
     --cmake-args \
     -DSECURITY=ON \
     --no-warn-unused-cli \
@@ -18,7 +19,6 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
 # ===================================
 # Set image entry
 # ===================================
-
 COPY ./ros_entrypoint.sh /
 ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["ros2", "launch", "acrobat", "acrobat.launch.py"]
+CMD ["ros2", "run", "acrobat_imu", "acrobat_imu"]
