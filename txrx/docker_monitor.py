@@ -88,4 +88,5 @@ class DockerMonitor:
                                              detach=True,
                                              name='acrobat',
                                              volumes={'/dev/acrobat/fc': {'bind': '/dev/acrobat/fc', 'mode': 'rw'},
-                                                      '/dev/acrobat/radio': {'bind': '/dev/acrobat/radio', 'mode': 'rw'}})
+                                                      '/dev/acrobat/radio': {'bind': '/dev/acrobat/radio', 'mode': 'rw'},
+                                                      '/media/acrobat/logs': {'bind': '/logs', 'mode': 'rw'}})
