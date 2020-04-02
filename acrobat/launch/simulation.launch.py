@@ -5,7 +5,9 @@ from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 from launch import LaunchDescription
 import launch
+from ament_index_python import get_package_share_directory
 
+import os
 from typing import Dict
 
 
@@ -136,11 +138,17 @@ def generate_launch_description():
         emulate_tty=True,
     ))
 
+    rviz_config_dir = os.path.join(
+        get_package_share_directory('acrobat'),
+        'rviz',
+        'acrobat.rviz')
+
     # Launch RViz2
     description.add_action(Node(
         package='rviz2',
         node_executable='rviz2',
         node_name='rviz',
+        arguments=['-d', rviz_config_dir, '-f', 'world'],
         output='screen',
         emulate_tty=True
     ))
