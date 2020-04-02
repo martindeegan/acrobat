@@ -15,9 +15,17 @@ find_package(acrobat_msgs REQUIRED)
 
 add_library(msp_bridge SHARED src/msp_bridge.cpp)
 target_include_directories(msp_bridge PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                                 "$<INSTALL_INTERFACE:include>")
+                                             "$<INSTALL_INTERFACE:include>")
 target_compile_definitions(msp_bridge PRIVATE "COMPOSITION_BUILDING_DLL")
-ament_target_dependencies(msp_bridge "rclcpp" "rclcpp_components" "sensor_msgs" "acrobat_common" "acrobat_msgs" "project_settings" "msp")
+ament_target_dependencies(
+  msp_bridge
+  "rclcpp"
+  "rclcpp_components"
+  "sensor_msgs"
+  "acrobat_common"
+  "acrobat_msgs"
+  "project_settings"
+  "msp")
 rclcpp_components_register_nodes(msp_bridge "acrobat::msp_bridge::MspBridge")
 
 ament_export_include_directories(include)

@@ -53,3 +53,6 @@ void VisualOdometry::image_callback(const Image::SharedPtr image_msg) {
 }
 
 } // namespace acrobat::localization
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(acrobat::localization::VisualOdometry)

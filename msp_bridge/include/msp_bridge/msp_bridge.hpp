@@ -22,8 +22,6 @@ class Motor;
 
 } // namespace msp
 
-namespace sensor_msgs::msg {} // namespace sensor_msgs::msg
-
 namespace acrobat::msp_bridge {
 
 class MspBridge : public rclcpp::Node {

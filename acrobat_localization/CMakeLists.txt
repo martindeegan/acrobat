@@ -14,10 +14,10 @@ find_package(acrobat_common REQUIRED)
 add_library(acrobat_visual_odometry SHARED src/visual_odometry.cpp)
 target_include_directories(acrobat_visual_odometry PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                                           "$<INSTALL_INTERFACE:include>")
+target_compile_definitions(acrobat_visual_odometry PRIVATE "COMPOSITION_BUILDING_DLL")
 ament_target_dependencies(acrobat_visual_odometry "project_settings" "acrobat_common" "rclcpp" "rclcpp_components"
                           "sensor_msgs")
-rclcpp_components_register_nodes(acrobat_visual_odometry "acrobat::msp_bridge::MspBridge")
-target_compile_definitions(acrobat_visual_odometry PRIVATE "COMPOSITION_BUILDING_DLL")
+rclcpp_components_register_nodes(acrobat_visual_odometry "acrobat::localization::VisualOdometry")
 
 ament_export_include_directories(include)
 ament_export_libraries(acrobat_visual_odometry)

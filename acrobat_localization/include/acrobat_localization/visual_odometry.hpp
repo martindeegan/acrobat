@@ -7,11 +7,15 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 
+#include <acrobat_common/composition/visibility_control.hpp>
+
 namespace acrobat::localization {
 
 class VisualOdometry : public rclcpp::Node {
   public:
-    VisualOdometry(const rclcpp::NodeOptions& options);
+    ACROBAT_COMPOSITION_PUBLIC
+
+    explicit VisualOdometry(const rclcpp::NodeOptions& options);
     ~VisualOdometry();
 
   private:
