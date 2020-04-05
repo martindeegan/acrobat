@@ -1,5 +1,6 @@
 #pragma once
 
+#include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/transform.hpp>
 
 #include <acrobat_common/lie_groups/lie_groups.hpp>
@@ -17,5 +18,11 @@ void convert(const lie_groups::Vector3& acrobat_vector3, geometry_msgs::msg::Vec
 // Converts between the TF2 quaternion message the Sophus SO3 object
 void convert(const geometry_msgs::msg::Transform& tf2_transform, lie_groups::SE3& acrobat_se3);
 void convert(const lie_groups::SE3& acrobat_se3, geometry_msgs::msg::Transform& tf2_transform);
+
+void convert(const geometry_msgs::msg::Point& point_msg, lie_groups::Vector3& acrobat_vector3);
+void convert(const lie_groups::Vector3& acrobat_vector3, geometry_msgs::msg::Point& point_msg);
+
+void convert(const geometry_msgs::msg::Pose& pose_msg, lie_groups::SE3& acrobat_se3);
+void convert(const lie_groups::SE3& acrobat_se3, geometry_msgs::msg::Pose& pose_msg);
 
 } // namespace acrobat::lie_group_conversions

@@ -4,7 +4,8 @@
 
 namespace acrobat::rf {
 
-const std::string world = "world";
+const std::string world        = "world";
+const std::string ground_truth = "ground_truth";
 
 const std::string acrobat_body   = "acrobat";
 const std::string acrobat_imu    = "acrobat_imu";

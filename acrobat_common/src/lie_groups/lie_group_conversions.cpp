@@ -40,4 +40,26 @@ void convert(const SE3& acrobat_se3, geometry_msgs::msg::Transform& tf2_transfor
     convert(acrobat_se3.translation(), tf2_transform.translation);
 }
 
+void convert(const geometry_msgs::msg::Point& point_msg, Vector3& acrobat_vector3) {
+    acrobat_vector3.x() = point_msg.x;
+    acrobat_vector3.y() = point_msg.y;
+    acrobat_vector3.z() = point_msg.z;
+}
+
+void convert(const Vector3& acrobat_vector3, geometry_msgs::msg::Point& point_msg) {
+    point_msg.x = acrobat_vector3.x();
+    point_msg.y = acrobat_vector3.y();
+    point_msg.z = acrobat_vector3.z();
+}
+
+void convert(const geometry_msgs::msg::Pose& pose_msg, SE3& acrobat_se3) {
+    convert(pose_msg.orientation, acrobat_se3.so3());
+    convert(pose_msg.position, acrobat_se3.translation());
+}
+
+void convert(const SE3& acrobat_se3, geometry_msgs::msg::Pose& pose_msg) {
+    convert(acrobat_se3.so3(), pose_msg.orientation);
+    convert(acrobat_se3.translation(), pose_msg.position);
+}
+
 } // namespace acrobat::lie_group_conversions
