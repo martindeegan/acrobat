@@ -120,14 +120,13 @@ def generate_launch_description():
     # # Rosbag2 Logging
     # # Add more topics here
     # topics = ['/acrobat/imu', '/acrobat/camera', '/acrobat/fc_imu']
-    # description.add_action(ExecuteProcess(
-    #     cmd=['ros2', 'bag', 'record', '--no-discovery'] + topics,
-    #     name='rosbag2',
-    #     cwd='/home/martin/rosbag',
-    #     output='screen',
-    #     emulate_tty=True,
-    #     condition=IfCondition(get_toggle('rosbag_logging')))
-    # )
+    description.add_action(ExecuteProcess(
+        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', '/home/martin/fpv_datasets/uzh_fpv/indoor_forward_3_snapdragon_with_gt.bag'],
+        name='rosbag2',
+        output='screen',
+        emulate_tty=True,
+        condition=IfCondition(get_toggle('rosbag_logging')))
+    )
 
     # Launch ROS1 Bridge
     description.add_action(Node(
@@ -157,16 +156,36 @@ def generate_launch_description():
     autonomy_nodes = get_acrobat_autonomy_nodes(module_toggles['autonomy'])
     utility_nodes = get_acrobat_utility_nodes(module_toggles['utilities'])
 
+    compostable_nodes = sensor_nodes + autonomy_nodes + utility_nodes
+    # TODO remove
+    compostable_nodes = []
+
     acrobat_node_container = ComposableNodeContainer(
         node_name='acrobat_container',
         node_namespace='',
         package='rclcpp_components',
         node_executable='component_container',
-        composable_node_descriptions=sensor_nodes + autonomy_nodes + utility_nodes,
+        composable_node_descriptions=compostable_nodes,
         output='screen',
         emulate_tty=True,
     )
 
-    description.add_action(acrobat_node_container)
+    vio_node = Node(
+        package='acrobat_localization',
+        node_executable='acrobat_vio',
+        node_name='acrobat_vio',
+        node_namespace='',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'camera_topic': '/snappy_cam/stereo_r',
+            'imu_topic': '/snappy_imu',
+            'ground_truth_transform_topic': '/vrpn_client/raw_transform',
+            'ground_truth_pose_topic': '/groundtruth/pose'
+        }]
+    )
+
+    # TODO revert
+    description.add_action(vio_node)
 
     return description
