@@ -6,67 +6,15 @@ using Tangent = acrobat::lie_groups::SE3::Tangent;
 
 namespace acrobat::localization {
 
-ImuPropagator::SharedPtr ImuPropagator::create() { return nullptr; }
-
-ImuPropagator::ImuPropagator() : first_sample_(true) {}
-
-const Sample& ImuPropagator::add_measurement(const rclcpp::Time&        stamp,
-                                             lie_groups::SE3::Tangent&& imu_sample) {
-    // TODO print warning
-    if (stamp < samples_.begin()->stamp) {
-        first_sample_ = true;
-        samples_.clear();
-    }
-
-    Sample new_sample;
-    new_sample.stamp      = stamp;
-    new_sample.imu_sample = imu_sample;
-
-    if (first_sample_) {
-        new_sample.pose     = SE3{};
-        new_sample.velocity = Tangent::Zero();
-        first_sample_       = false;
-    }
-
-    samples_.push_back(new_sample);
-    if (samples_.size() >= 2) {
-        auto next = samples_.end() - 1;
-        auto prev = next - 1;
-        integrate(prev, next);
-    }
-
-    return samples_.back();
+ImuPropagator::SharedPtr ImuPropagator::create(rclcpp::Logger logger) {
+    return std::make_shared<ImuPropagator>(logger);
 }
 
-void ImuPropagator::update_latest_pose(const rclcpp::Time& stamp,
-                                       const SE3&          pose,
-                                       const Tangent&      velocity) {
-    // Find location in sample vector
-    auto it = samples_.begin();
-    for (; it != samples_.end() && it->stamp < stamp; it++)
-        ;
+ImuPropagator::ImuPropagator(rclcpp::Logger logger) : logger_(logger) {}
 
-    it->pose     = pose;
-    it->velocity = velocity;
-    it->stamp    = stamp;
-
-    Samples new_samples(it, samples_.end());
-
-    auto prev_it = new_samples.begin();
-    auto next_it = new_samples.begin() + 1;
-    for (; next_it != new_samples.end(); prev_it++, next_it++) { integrate(prev_it, next_it); }
-}
-
-void ImuPropagator::integrate(Samples::iterator prev, Samples::iterator next) {
-    const double dt = (next->stamp - prev->stamp).seconds();
-
-    const auto& R            = prev->pose.so3();
-    Tangent     acceleration = Tangent::Zero();
-    acceleration.topRows<3>() =
-        prev->imu_sample.topRows<3>() - bias_.topRows<3>() - R.inverse() * gravity_;
-
-    next->velocity = prev->velocity + acceleration * dt;
-    next->pose     = prev->pose * SE3::exp(prev->velocity * dt + acceleration * 0.5 * dt * dt);
+State ImuPropagator::add_sample(rclcpp::Time&& stamp, ImuSample&& sample) {
+    State state;
+    return state;
 }
 
 } // namespace acrobat::localization

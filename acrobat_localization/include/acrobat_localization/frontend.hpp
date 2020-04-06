@@ -28,10 +28,9 @@ class Frontend {
                             cv::Ptr<DetectorType> detector = DetectorType::create());
 
     virtual void run();
+    virtual void stop() noexcept;
 
     virtual void add_image(Frame::SharedPtr& frame);
-
-    void stop() const noexcept;
 
   private:
     std::atomic_bool running_;

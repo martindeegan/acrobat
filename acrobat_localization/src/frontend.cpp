@@ -18,8 +18,10 @@ Frontend::~Frontend() {}
 
 void Frontend::run() {
     time::Rate loop_rate(100);
-    while (rclcpp::ok() && running_) {}
+    while (rclcpp::ok() && running_) { loop_rate.sleep(); }
 }
+
+void Frontend::stop() noexcept { running_ = false; }
 
 void Frontend::add_image(Frame::SharedPtr& frame) {
     frame->extract_features(detector_);

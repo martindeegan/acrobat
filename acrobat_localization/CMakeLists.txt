@@ -7,7 +7,6 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
-find_package(rosbag2 REQUIRED)
 
 # find project dependencies
 find_package(project_settings REQUIRED)
