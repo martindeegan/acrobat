@@ -128,6 +128,25 @@ def generate_launch_description():
         condition=IfCondition(get_toggle('rosbag_logging')))
     )
 
+    vio_node = Node(
+        package='acrobat_localization',
+        node_executable='acrobat_vio',
+        node_name='acrobat_vio',
+        node_namespace='',
+        output='screen',
+        emulate_tty=True,
+        parameters=[{
+            'camera_topic': '/snappy_cam/stereo_r',
+            'imu_topic': '/snappy_imu',
+                'ground_truth_transform_topic': '/vrpn_client/raw_transform',
+                'ground_truth_pose_topic': '/groundtruth/pose',
+                'display': True
+        }]
+    )
+
+    # TODO revert
+    description.add_action(vio_node)
+
     # Launch ROS1 Bridge
     description.add_action(Node(
         package='ros1_bridge',
@@ -169,23 +188,5 @@ def generate_launch_description():
         output='screen',
         emulate_tty=True,
     )
-
-    vio_node = Node(
-        package='acrobat_localization',
-        node_executable='acrobat_vio',
-        node_name='acrobat_vio',
-        node_namespace='',
-        output='screen',
-        emulate_tty=True,
-        parameters=[{
-            'camera_topic': '/snappy_cam/stereo_r',
-            'imu_topic': '/snappy_imu',
-            'ground_truth_transform_topic': '/vrpn_client/raw_transform',
-            'ground_truth_pose_topic': '/groundtruth/pose'
-        }]
-    )
-
-    # TODO revert
-    description.add_action(vio_node)
 
     return description
