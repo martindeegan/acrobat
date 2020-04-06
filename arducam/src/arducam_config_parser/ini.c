@@ -37,15 +37,13 @@ typedef struct {
 /* Strip whitespace chars off end of given string, in place. Return s. */
 static char* rstrip(char* s) {
     char* p = s + strlen(s);
-    while (p > s && isspace((unsigned char)(*--p)))
-        *p = '\0';
+    while (p > s && isspace((unsigned char)(*--p))) *p = '\0';
     return s;
 }
 
 /* Return pointer to first non-whitespace char in given string. */
 static char* lskip(const char* s) {
-    while (*s && isspace((unsigned char)(*s)))
-        s++;
+    while (*s && isspace((unsigned char)(*s))) s++;
     return (char*)s;
 }
 
@@ -61,9 +59,7 @@ static char* find_chars_or_comment(const char* s, const char* chars) {
         s++;
     }
 #else
-    while (*s && (!chars || !strchr(chars, *s))) {
-        s++;
-    }
+    while (*s && (!chars || !strchr(chars, *s))) { s++; }
 #endif
     return (char*)s;
 }
@@ -101,9 +97,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
 
 #if !INI_USE_STACK
     line = (char*)malloc(INI_INITIAL_ALLOC);
-    if (!line) {
-        return -2;
-    }
+    if (!line) { return -2; }
 #endif
 
 #if INI_HANDLER_LINENO
@@ -118,18 +112,15 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
         offset = strlen(line);
         while (offset == max_line - 1 && line[offset - 1] != '\n') {
             max_line *= 2;
-            if (max_line > INI_MAX_LINE)
-                max_line = INI_MAX_LINE;
+            if (max_line > INI_MAX_LINE) max_line = INI_MAX_LINE;
             new_line = realloc(line, max_line);
             if (!new_line) {
                 free(line);
                 return -2;
             }
             line = new_line;
-            if (reader(line + offset, max_line - offset, stream) == NULL)
-                break;
-            if (max_line >= INI_MAX_LINE)
-                break;
+            if (reader(line + offset, max_line - offset, stream) == NULL) break;
+            if (max_line >= INI_MAX_LINE) break;
             offset += strlen(line + offset);
         }
 #endif
@@ -152,8 +143,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
         else if (*prev_name && *start && start > line) {
             /* Non-blank line with leading whitespace, treat as continuation
                of previous name's value (as per Python configparser). */
-            if (!HANDLER(user, section, prev_name, start) && !error)
-                error = lineno;
+            if (!HANDLER(user, section, prev_name, start) && !error) error = lineno;
         }
 #endif
         else if (*start == '[') {
@@ -169,8 +159,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
                 strncpy0(section, start + 1, sizeof(section));
                 *prev_name = '\0';
 #if INI_CALL_HANDLER_ON_NEW_SECTION
-                if (!HANDLER(user, section, NULL, NULL) && !error)
-                    error = lineno;
+                if (!HANDLER(user, section, NULL, NULL) && !error) error = lineno;
 #endif
             } else if (!error) {
                 /* No ']' found on section line */
@@ -185,16 +174,14 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
                 value = end + 1;
 #if INI_ALLOW_INLINE_COMMENTS
                 end = find_chars_or_comment(value, NULL);
-                if (*end)
-                    *end = '\0';
+                if (*end) *end = '\0';
 #endif
                 value = lskip(value);
                 rstrip(value);
 
                 /* Valid name[=:]value pair found, call handler */
                 strncpy0(prev_name, name, sizeof(prev_name));
-                if (!HANDLER(user, section, name, value) && !error)
-                    error = lineno;
+                if (!HANDLER(user, section, name, value) && !error) error = lineno;
             } else if (!error) {
                 /* No '=' or ':' found on name[=:]value line */
                 error = lineno;
@@ -202,8 +189,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler, void*
         }
 
 #if INI_STOP_ON_FIRST_ERROR
-        if (error)
-            break;
+        if (error) break;
 #endif
     }
 
@@ -225,8 +211,7 @@ int ini_parse(const char* filename, ini_handler handler, void* user) {
     int   error;
 
     file = fopen(filename, "r");
-    if (!file)
-        return -1;
+    if (!file) return -1;
     error = ini_parse_file(file, handler, user);
     fclose(file);
     return error;
@@ -241,15 +226,13 @@ static char* ini_reader_string(char* str, int num, void* stream) {
     char*                 strp         = str;
     char                  c;
 
-    if (ctx_num_left == 0 || num < 2)
-        return NULL;
+    if (ctx_num_left == 0 || num < 2) return NULL;
 
     while (num > 1 && ctx_num_left != 0) {
         c = *ctx_ptr++;
         ctx_num_left--;
         *strp++ = c;
-        if (c == '\n')
-            break;
+        if (c == '\n') break;
         num--;
     }
 
