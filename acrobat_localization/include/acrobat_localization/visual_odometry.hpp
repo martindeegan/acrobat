@@ -12,6 +12,7 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <tf2_ros/buffer.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -43,6 +44,7 @@ class VisualOdometry : public rclcpp::Node {
 
     geometry_msgs::msg::TransformStamped           pose_msg_stamped_;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+    std::unique_ptr<tf2_ros::StaticBroadcasterQoS> tf_static_broadcaster_;
     std::unique_ptr<tf2_ros::TransformListener>    tf_listener_;
     std::unique_ptr<tf2_ros::Buffer>               tf_buffer_;
 

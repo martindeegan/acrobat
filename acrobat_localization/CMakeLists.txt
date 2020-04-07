@@ -47,7 +47,13 @@ install(
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_clang_format REQUIRED)
 
+  # Get link config files
+  symlink_link_configs()
+
+  find_file(CLANG_FORMAT_CONFIG PATHS ${CMAKE_INSTALL_PREFIX}/..)
+  ament_clang_format(TESTNAME acrobat_common_clang_format_test CONFIG_FILE ${CLANG_FORMAT_CONFIG})
 endif()
 
 ament_package()

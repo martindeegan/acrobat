@@ -10,7 +10,6 @@ build_base_arm64:
 	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	docker build -t martindeegan/acrobat:${TAG}_base_arm64 \
 				 --file dockerfiles/base/Dockerfile \
-				 --cache-from martindeegan/acrobat:latest_base_arm64 \
 				 --build-arg FROM_IMAGE=nvcr.io/nvidia/l4t-base:r32.3.1 \
 				 .
 

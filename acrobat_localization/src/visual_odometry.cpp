@@ -54,7 +54,42 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
     pose_msg_stamped_.header.frame_id = rf::world;
     tf_broadcaster_                   = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
-    // TODO: add velocity publish
+    std::this_thread::sleep_for(1s);
+    tf2::Transform identity;
+    identity.setIdentity();
+    geometry_msgs::msg::TransformStamped gt_to_world;
+    tf2::convert(identity, gt_to_world.transform);
+    gt_to_world.header.frame_id = rf::world;
+    gt_to_world.child_frame_id  = rf::ground_truth;
+    gt_to_world.header.stamp    = rclcpp::Time();
+    tf_broadcaster_->sendTransform(gt_to_world);
+
+    geometry_msgs::msg::TransformStamped imu_to_gt_msg;
+    tf2::convert(identity, imu_to_gt_msg.transform);
+    imu_to_gt_msg.header.frame_id = rf::ground_truth;
+    imu_to_gt_msg.child_frame_id  = rf::ground_truth_imu;
+    imu_to_gt_msg.header.stamp    = rclcpp::Time();
+    tf_broadcaster_->sendTransform(imu_to_gt_msg);
+
+    tf2::Matrix3x3 cam_to_imu_rot;
+    cam_to_imu_rot[0][0] = -0.01182306;
+    cam_to_imu_rot[0][1] = 0.01155299;
+    cam_to_imu_rot[0][2] = 0.99986336;
+    cam_to_imu_rot[1][0] = -0.99987014;
+    cam_to_imu_rot[1][1] = 0.01081377;
+    cam_to_imu_rot[1][2] = -0.01194809;
+    cam_to_imu_rot[2][0] = -0.01095033;
+    cam_to_imu_rot[2][1] = -0.99987479;
+    cam_to_imu_rot[2][2] = 0.01142364;
+    tf2::Vector3                         cam_to_imu_trans{-0.00029028, -0.05790695, -0.0001919};
+    tf2::Transform                       cam_to_imu(cam_to_imu_rot, cam_to_imu_trans);
+    geometry_msgs::msg::TransformStamped cam_to_imu_msg;
+    tf2::convert(cam_to_imu.inverse(), cam_to_imu_msg.transform);
+
+    cam_to_imu_msg.header.stamp    = rclcpp::Time();
+    cam_to_imu_msg.header.frame_id = rf::ground_truth_imu;
+    cam_to_imu_msg.child_frame_id  = rf::ground_truth_camera;
+    tf_broadcaster_->sendTransform(cam_to_imu_msg);
 
     // Subscribe to sensor topics
     imu_subscription_ =
@@ -106,27 +141,34 @@ void VisualOdometry::image_callback(const Image::SharedPtr image_msg) {
 }
 
 void VisualOdometry::ground_truth_pose_callback(const PoseStamped::SharedPtr gt_msg) {
-    // geometry_msgs::msg::TransformStamped pose_msg;
-    // pose_msg.child_frame_id = rf::ground_truth;
-    // pose_msg.header         = gt_msg->header;
+    geometry_msgs::msg::TransformStamped pose_msg;
+    pose_msg.child_frame_id = rf::ground_truth;
+    pose_msg.header         = gt_msg->header;
 
-    // RCLCPP_INFO(get_logger(), "got ground_truth");
+    static bool            first_message = true;
+    static lie_groups::SE3 first_pose;
+    if (first_message) {
+        lie_group_conversions::convert(gt_msg->pose, first_pose);
+        first_pose    = first_pose.inverse();
+        first_message = false;
+    }
 
-    // pose_msg.transform.rotation      = gt_msg->pose.orientation;
-    // pose_msg.transform.translation.x = gt_msg->pose.position.x;
-    // pose_msg.transform.translation.y = gt_msg->pose.position.y;
-    // pose_msg.transform.translation.z = gt_msg->pose.position.z;
-    // tf_broadcaster_->sendTransform(pose_msg);
+    // Remove starting offset
+    lie_groups::SE3 pose;
+    lie_group_conversions::convert(gt_msg->pose, pose);
+    pose = first_pose * pose;
+
+    lie_group_conversions::convert(pose, pose_msg.transform);
+
+    tf_broadcaster_->sendTransform(pose_msg);
 }
 
 void VisualOdometry::ground_truth_transform_callback(const TransformStamped::SharedPtr gt_msg) {
-    // geometry_msgs::msg::TransformStamped pose_msg = *gt_msg;
-    // pose_msg.child_frame_id                       = rf::ground_truth;
-    // pose_msg.header.frame_id                      = rf::world;
+    geometry_msgs::msg::TransformStamped pose_msg = *gt_msg;
+    pose_msg.child_frame_id                       = rf::ground_truth;
+    pose_msg.header.frame_id                      = rf::world;
 
-    // RCLCPP_INFO(get_logger(), "got ground_truth");
-
-    // tf_broadcaster_->sendTransform(pose_msg);
+    tf_broadcaster_->sendTransform(pose_msg);
 }
 
 } // namespace acrobat::localization

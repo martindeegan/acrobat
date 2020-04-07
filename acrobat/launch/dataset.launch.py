@@ -10,7 +10,7 @@ from ament_index_python import get_package_share_directory
 import os
 from typing import Dict
 
-dataset_uri = '/home/martin/fpv_datasets/uzh_fpv/indoor_forward_3_snapdragon_with_gt.bag'
+dataset_uri = '/home/martin/fpv_datasets/uzh_fpv/outdoor_forward_1_snapdragon_with_gt.bag'
 module_toggles = {
     'sensors': {
         'arducam': False,
@@ -32,6 +32,8 @@ vio_params = {
     'ground_truth_pose_topic': '/groundtruth/pose',
     'display': True
 }
+
+rviz_reference_frame = 'ground_truth'
 
 
 def get_toggle(name: str):
@@ -110,6 +112,21 @@ def get_acrobat_utility_nodes(utility_toggles: Dict[str, bool]):
 def generate_launch_description():
     description = LaunchDescription()
 
+    rviz_config_dir = os.path.join(
+        get_package_share_directory('acrobat'),
+        'rviz',
+        'acrobat.rviz')
+
+    # Launch RViz2
+    description.add_action(Node(
+        package='rviz2',
+        node_executable='rviz2',
+        node_name='rviz',
+        arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
+        output='screen',
+        emulate_tty=True
+    ))
+
     description.add_action(
         LogInfo(msg=["===================================="]))
     for modules in module_toggles.values():
@@ -125,18 +142,6 @@ def generate_launch_description():
                                                  default_value='True', description='Enable ros1 bridge'))
     description.add_action(DeclareLaunchArgument(name='enable_rviz',
                                                  default_value='True', description='Enable rviz2 gui'))
-
-    # # Rosbag2 Logging
-    # # Add more topics here
-    # topics = ['/acrobat/imu', '/acrobat/camera', '/acrobat/fc_imu']
-    description.add_action(ExecuteProcess(
-        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', dataset_uri],
-        name='rosbag2',
-        output='screen',
-        emulate_tty=True,
-        condition=IfCondition(get_toggle('rosbag_logging')))
-    )
-
     # TODO remove
     vio_node = Node(
         package='acrobat_localization',
@@ -148,21 +153,6 @@ def generate_launch_description():
         parameters=[vio_params]
     )
     description.add_action(vio_node)
-
-    rviz_config_dir = os.path.join(
-        get_package_share_directory('acrobat'),
-        'rviz',
-        'acrobat.rviz')
-
-    # Launch RViz2
-    description.add_action(Node(
-        package='rviz2',
-        node_executable='rviz2',
-        node_name='rviz',
-        arguments=['-d', rviz_config_dir, '-f', 'world'],
-        output='screen',
-        emulate_tty=True
-    ))
 
     sensor_nodes = get_acrobat_sensor_nodes(module_toggles['sensors'])
     autonomy_nodes = get_acrobat_autonomy_nodes(module_toggles['autonomy'])
@@ -180,6 +170,17 @@ def generate_launch_description():
         composable_node_descriptions=compostable_nodes,
         output='screen',
         emulate_tty=True,
+    )
+
+    # # Rosbag2 Logging
+    # # Add more topics here
+    # topics = ['/acrobat/imu', '/acrobat/camera', '/acrobat/fc_imu']
+    description.add_action(ExecuteProcess(
+        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', dataset_uri],
+        name='rosbag2',
+        output='screen',
+        emulate_tty=True,
+        condition=IfCondition(get_toggle('rosbag_logging')))
     )
 
     return description
