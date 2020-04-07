@@ -22,8 +22,8 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
 
 # Run unit tests
 RUN source "${ROS2_WS}/install/setup.bash" && \
-    colcon test --return-code-on-test-failure
-    --packages-skip vision_opencv msp cv_bridge image_geometry opencv_tests \
+    colcon test --return-code-on-test-failure \
+    --packages-skip vision_opencv msp cv_bridge image_geometry opencv_tests
 
 COPY ./ros_entrypoint.sh /
 ENTRYPOINT ["/ros_entrypoint.sh"]
