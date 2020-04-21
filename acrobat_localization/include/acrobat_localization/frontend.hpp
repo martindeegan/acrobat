@@ -20,7 +20,7 @@ class Frontend {
     Frontend(rclcpp::Logger         logger,
              Visualizer::SharedPtr  visualizer,
              cv::Ptr<cv::Feature2D> detector);
-    ~Frontend();
+    virtual ~Frontend();
 
     template<class DetectorType>
     static SharedPtr create(rclcpp::Logger        logger,

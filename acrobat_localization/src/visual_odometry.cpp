@@ -1,4 +1,5 @@
 #include <chrono>
+#include <functional>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/features2d.hpp>
@@ -20,7 +21,6 @@ using acrobat::common::constants::camera_topic;
 using acrobat::common::constants::imu_topic;
 
 using namespace std::chrono_literals;
-using namespace std::placeholders;
 
 namespace acrobat::localization {
 
@@ -92,24 +92,24 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
     tf_broadcaster_->sendTransform(cam_to_imu_msg);
 
     // Subscribe to sensor topics
-    imu_subscription_ =
-        create_subscription<Imu>(parameter_client->get_parameter<std::string>("imu_topic"),
-                                 10,
-                                 std::bind(&VisualOdometry::imu_callback, this, _1));
-    image_subscription_ =
-        create_subscription<Image>(parameter_client->get_parameter<std::string>("camera_topic"),
-                                   1,
-                                   std::bind(&VisualOdometry::image_callback, this, _1));
+    imu_subscription_ = create_subscription<Imu>(
+        parameter_client->get_parameter<std::string>("imu_topic"),
+        10,
+        std::bind(&VisualOdometry::imu_callback, this, std::placeholders::_1));
+    image_subscription_ = create_subscription<Image>(
+        parameter_client->get_parameter<std::string>("camera_topic"),
+        1,
+        std::bind(&VisualOdometry::image_callback, this, std::placeholders::_1));
 
     // Subscribe to ground truth topics
     ground_truth_pose_subscription_ = create_subscription<PoseStamped>(
         parameter_client->get_parameter<std::string>("ground_truth_pose_topic"),
         10,
-        std::bind(&VisualOdometry::ground_truth_pose_callback, this, _1));
+        std::bind(&VisualOdometry::ground_truth_pose_callback, this, std::placeholders::_1));
     ground_truth_transform_subscription_ = create_subscription<TransformStamped>(
         parameter_client->get_parameter<std::string>("ground_truth_transform_topic"),
         10,
-        std::bind(&VisualOdometry::ground_truth_transform_callback, this, _1));
+        std::bind(&VisualOdometry::ground_truth_transform_callback, this, std::placeholders::_1));
 }
 
 VisualOdometry::~VisualOdometry() {
