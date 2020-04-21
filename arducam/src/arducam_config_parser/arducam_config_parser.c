@@ -95,13 +95,11 @@ static void parse_camera_parameter(CameraParam* camera_param, const char* name, 
 }
 
 static int parser_handle(void* user, const char* section, const char* name, const char* value) {
-    if (!user)
-        return 0;
+    if (!user) return 0;
     CameraConfigs* configs = (CameraConfigs*)user;
     uint32_t       config_type, section_type;
 
-    if (!(section_type = get_type(section_types, section)))
-        return 1;
+    if (!(section_type = get_type(section_types, section))) return 1;
 
     if (section_type == SECTION_TYPE_CAMERA) {
         parse_camera_parameter(&configs->camera_param, name, value);

@@ -5,8 +5,35 @@ from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 from launch import LaunchDescription
 import launch
+from ament_index_python import get_package_share_directory
 
+import os
 from typing import Dict
+
+dataset_uri = '/home/martin/fpv_datasets/uzh_fpv/outdoor_forward_1_snapdragon_with_gt.bag'
+module_toggles = {
+    'sensors': {
+        'arducam': False,
+        'msp_bridge': False,
+        'vectornav': False
+    },
+    'autonomy': {
+        'visual_odometry': True
+    },
+    'utilities': {
+        'image_viewer': False
+    }
+}
+
+vio_params = {
+    'camera_topic': '/snappy_cam/stereo_r',
+    'imu_topic': '/snappy_imu',
+    'ground_truth_transform_topic': '/vrpn_client/raw_transform',
+    'ground_truth_pose_topic': '/groundtruth/pose',
+    'display': True
+}
+
+rviz_reference_frame = 'ground_truth'
 
 
 def get_toggle(name: str):
@@ -63,7 +90,19 @@ def get_acrobat_sensor_nodes(sensor_toggles: Dict[str, bool]):
 
 
 def get_acrobat_autonomy_nodes(autonomy_toggles: Dict[str, bool]):
-    return []
+    vio_node = ComposableNode(
+        package='acrobat_localization',
+        node_plugin='acrobat::localization::VisualOdometry',
+        node_name='acrobat_vio',
+        parameters=[{
+        }],
+    )
+
+    autonomy_nodes = []
+    if autonomy_toggles['visual_odometry']:
+        autonomy_nodes.append(vio_node)
+
+    return autonomy_nodes
 
 
 def get_acrobat_utility_nodes(utility_toggles: Dict[str, bool]):
@@ -73,17 +112,20 @@ def get_acrobat_utility_nodes(utility_toggles: Dict[str, bool]):
 def generate_launch_description():
     description = LaunchDescription()
 
-    module_toggles = {
-        'sensors': {
-            'arducam': False,
-            'msp_bridge': False,
-            'vectornav': True
-        },
-        'autonomy': {},
-        'utilities': {
-            'image_viewer': False
-        }
-    }
+    rviz_config_dir = os.path.join(
+        get_package_share_directory('acrobat'),
+        'rviz',
+        'acrobat.rviz')
+
+    # Launch RViz2
+    description.add_action(Node(
+        package='rviz2',
+        node_executable='rviz2',
+        node_name='rviz',
+        arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
+        output='screen',
+        emulate_tty=True
+    ))
 
     description.add_action(
         LogInfo(msg=["===================================="]))
@@ -100,53 +142,45 @@ def generate_launch_description():
                                                  default_value='True', description='Enable ros1 bridge'))
     description.add_action(DeclareLaunchArgument(name='enable_rviz',
                                                  default_value='True', description='Enable rviz2 gui'))
-
-    # Rosbag2 Logging
-    # Add more topics here
-    topics = ['/acrobat/imu', '/acrobat/camera', '/acrobat/fc_imu']
-    description.add_action(ExecuteProcess(
-        cmd=['ros2', 'bag', 'record', '--no-discovery'] + topics,
-        name='rosbag2',
-        cwd='/home/martin/rosbag',
+    # TODO remove
+    vio_node = Node(
+        package='acrobat_localization',
+        node_executable='acrobat_vio',
+        node_name='acrobat_vio',
+        node_namespace='',
         output='screen',
         emulate_tty=True,
-        condition=IfCondition(get_toggle('rosbag_logging')))
+        parameters=[vio_params]
     )
-
-    # Launch ROS1 Bridge
-    description.add_action(Node(
-        package='ros1_bridge',
-        node_executable='dynamic_bridge',
-        node_name='ros1_bridge',
-        output='screen',
-        emulate_tty=True,
-        condition=IfCondition(get_toggle('ros1_bridge'))
-    ))
-
-    # Launch RViz2
-    description.add_action(Node(
-        package='rviz2',
-        node_executable='rviz2',
-        node_name='rviz',
-        output='screen',
-        emulate_tty=True,
-        condition=IfCondition(get_toggle('rviz'))
-    ))
+    description.add_action(vio_node)
 
     sensor_nodes = get_acrobat_sensor_nodes(module_toggles['sensors'])
     autonomy_nodes = get_acrobat_autonomy_nodes(module_toggles['autonomy'])
     utility_nodes = get_acrobat_utility_nodes(module_toggles['utilities'])
+
+    compostable_nodes = sensor_nodes + autonomy_nodes + utility_nodes
+    # TODO remove
+    compostable_nodes = []
 
     acrobat_node_container = ComposableNodeContainer(
         node_name='acrobat_container',
         node_namespace='',
         package='rclcpp_components',
         node_executable='component_container',
-        composable_node_descriptions=sensor_nodes + autonomy_nodes + utility_nodes,
+        composable_node_descriptions=compostable_nodes,
         output='screen',
         emulate_tty=True,
     )
 
-    description.add_action(acrobat_node_container)
+    # # Rosbag2 Logging
+    # # Add more topics here
+    # topics = ['/acrobat/imu', '/acrobat/camera', '/acrobat/fc_imu']
+    description.add_action(ExecuteProcess(
+        cmd=['ros2', 'bag', 'play', '-s', 'rosbag_v2', dataset_uri],
+        name='rosbag2',
+        output='screen',
+        emulate_tty=True,
+        condition=IfCondition(get_toggle('rosbag_logging')))
+    )
 
     return description

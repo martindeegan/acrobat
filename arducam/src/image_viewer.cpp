@@ -14,9 +14,7 @@ ImageViewer::ImageViewer(const rclcpp::NodeOptions& options)
     cv::namedWindow(window_name_, cv::WINDOW_AUTOSIZE); // Create a window for display.
 }
 
-ImageViewer::~ImageViewer() {
-    cv::destroyWindow(window_name_);
-}
+ImageViewer::~ImageViewer() { cv::destroyWindow(window_name_); }
 
 void ImageViewer::receiveImage(const sensor_msgs::msg::Image::SharedPtr msg) {
     if (msg->encoding == sensor_msgs::image_encodings::TYPE_8UC1) {

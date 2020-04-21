@@ -20,13 +20,12 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-eloquent-sophus \
     ros-eloquent-ament-* \
-    ros-eloquent-vision-opencv \
-    ros-eloquent-ros2bag \
-    ros-eloquent-rosbag2* \
     && rm -rf /var/lib/apt/lists/*
 
 # ============ Install additional packages from source ===============
 RUN git clone --branch acrobat_mod https://github.com/martindeegan/msp.git "${ROS2_WS}/src/msp"
+RUN git clone --branch acrobat_mod https://github.com/martindeegan/vision_opencv.git "${ROS2_WS}/src/vision_opencv"
+RUN git clone --branch 4.0.2 https://github.com/borglab/gtsam.git "${ROS2_WS}/src/gtsam"
 RUN source "${ROS2_WS}/install/setup.bash" && \
     colcon build \
     --symlink-install \
@@ -38,4 +37,9 @@ RUN source "${ROS2_WS}/install/setup.bash" && \
     -DENABLE_CLANG_TIDY=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_EXAMPLES=OFF \
-    -DBUILD_TESTS=OFF
+    -DBUILD_TESTS=OFF \
+    -DG2O_BUILD_EXAMPLES=OFF \
+    -DG2O_BUILD_APPS=OFF \
+    -DG2O_USE_OPENGL=OFF \
+    -DG2O_USE_CSPARSE=OFF \
+    -DBUILD_CSPARSE=OFF

@@ -150,8 +150,7 @@ bool ArducamDriver::camera_init(const std::string& filename) {
         // Uint8 u8Buf[8];
         for (size_t i = 0; i < configs_length; ++i) {
             uint32_t type = configs[i].type;
-            if (((type >> 16) & 0xFF) && ((type >> 16) & 0xFF) != camera_config_.usbType)
-                continue;
+            if (((type >> 16) & 0xFF) && ((type >> 16) & 0xFF) != camera_config_.usbType) continue;
             switch (type & 0xFFFF) {
             case CONFIG_TYPE_REG:
                 ArduCam_writeSensorReg(camera_handle_, configs[i].params[0], configs[i].params[1]);
@@ -194,9 +193,7 @@ bool ArducamDriver::camera_init(const std::string& filename) {
 
 void ArducamDriver::configure_board(const Config& config) {
     uint8_t u8Buf[10];
-    for (unsigned n = 0; n < config.params[3]; n++) {
-        u8Buf[n] = config.params[4 + n];
-    }
+    for (unsigned n = 0; n < config.params[3]; n++) { u8Buf[n] = config.params[4 + n]; }
     ArduCam_setboardConfig(camera_handle_,
                            config.params[0],
                            config.params[1],
@@ -211,9 +208,7 @@ void ArducamDriver::capture_image() {
         ArduCam_captureImage(camera_handle_);
 
         // Wait for the image to become available
-        while (!ArduCam_availableImage(camera_handle_)) {
-            rclcpp::sleep_for(10ms);
-        }
+        while (!ArduCam_availableImage(camera_handle_)) { rclcpp::sleep_for(10ms); }
 
         uint32_t rtn_val = ArduCam_readImage(camera_handle_, frameData);
         if (rtn_val == USB_CAMERA_NO_ERROR) {

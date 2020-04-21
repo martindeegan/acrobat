@@ -11,18 +11,12 @@
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-namespace msp {
-
-namespace msg {
+namespace msp { namespace msg {
 
 class RawImu;
 class Motor;
 
-} // namespace msg
-
-} // namespace msp
-
-namespace sensor_msgs::msg {} // namespace sensor_msgs::msg
+}} // namespace msp::msg
 
 namespace acrobat::msp_bridge {
 

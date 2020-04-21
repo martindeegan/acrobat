@@ -3,7 +3,8 @@ project(project_settings CXX)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_settings INTERFACE)
-target_compile_features(project_settings INTERFACE cxx_std_17 cxx_auto_type cxx_nullptr cxx_right_angle_brackets)
+target_compile_features(project_settings INTERFACE cxx_auto_type cxx_nullptr cxx_right_angle_brackets
+                                                   cxx_variadic_templates cxx_lambdas)
 
 # standard compiler warnings
 include(cmake/CompilerWarnings.cmake)

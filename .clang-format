@@ -1,13 +1,19 @@
+---
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: 'true'
 AlignConsecutiveDeclarations: 'true'
 AlignOperands: 'true'
 AlignTrailingComments: 'true'
 AllowAllParametersOfDeclarationOnNextLine: 'false'
-AllowShortFunctionsOnASingleLine: 'false'
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: 'true'
+AllowShortLoopsOnASingleLine: 'true'
+AlwaysBreakTemplateDeclarations: 'true'
 BinPackArguments: 'false'
 BinPackParameters: 'false'
 ColumnLimit: '100'
+CompactNamespaces: 'true'
 DisableFormat: 'false'
 FixNamespaceComments: 'true'
 IncludeBlocks: Preserve
@@ -15,6 +21,7 @@ IndentWidth: '4'
 IndentWrappedFunctionNames: 'true'
 KeepEmptyLinesAtTheStartOfBlocks: 'false'
 Language: Cpp
+NamespaceIndentation: None
 PointerAlignment: Left
 ReflowComments: 'true'
 SortIncludes: 'true'
@@ -29,3 +36,6 @@ SpacesInParentheses: 'false'
 SpacesInSquareBrackets: 'false'
 Standard: Cpp11
 UseTab: Never
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+
+...

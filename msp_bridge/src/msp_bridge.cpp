@@ -42,9 +42,7 @@ MspBridge::MspBridge(const rclcpp::NodeOptions& options) : Node("msp_bridge", op
     imu_msg_.header.frame_id = "/acrobat/fc";
 }
 
-MspBridge::~MspBridge() {
-    msp_client_.stop();
-}
+MspBridge::~MspBridge() { msp_client_.stop(); }
 
 void MspBridge::on_imu(const msp::msg::RawImu& imu) {
     imu_msg_.header.stamp = rclcpp::Time();
