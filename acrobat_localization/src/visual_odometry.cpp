@@ -31,6 +31,14 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
     declare_parameter<std::string>("ground_truth_pose_topic", "/acrobat/gt_pose");
     declare_parameter<std::string>("ground_truth_transform_topic", "/acrobat/gt_transform");
 
+    declare_parameter<int>("ORB_nfeatures", 500);
+    declare_parameter<float>("ORB_scalefactor", 1.2);
+    declare_parameter<int>("ORB_nlevels", 8);
+    declare_parameter<int>("ORB_edgethresh", 31);
+    declare_parameter<int>("ORB_firstlevel", 0);
+    declare_parameter<int>("ORB_patchsize", 31);
+    declare_parameter<int>("ORB_fastthresh", 20);
+
     // Toggles
     declare_parameter<bool>("display", false);
 
@@ -42,8 +50,18 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
         visualizer_ = Visualizer::create(get_logger());
     }
     imu_propagator_ = ImuPropagator::create(get_logger());
-    frontend_       = Frontend::create<cv::ORB>(get_logger(), visualizer_);
-    backend_        = Backend::create(get_logger());
+    auto feature_detector =
+        cv::ORB::create(parameter_client->get_parameter<int>("ORB_nfeatures"),
+                        parameter_client->get_parameter<float>("ORB_scalefactor"),
+                        parameter_client->get_parameter<int>("ORB_nlevels"),
+                        parameter_client->get_parameter<int>("ORB_edgethresh"),
+                        parameter_client->get_parameter<int>("ORB_firstlevel"),
+                        2,
+                        cv::ORB::ScoreType::HARRIS_SCORE,
+                        parameter_client->get_parameter<int>("ORB_patchsize"),
+                        parameter_client->get_parameter<int>("ORB_fastthresh"));
+    frontend_ = Frontend::create<cv::ORB>(get_logger(), visualizer_, feature_detector);
+    backend_  = Backend::create(get_logger());
 
     RCLCPP_INFO(get_logger(), "Launching frontend and backend threads.");
     frontend_thread_ = std::thread(std::bind(&Frontend::run, frontend_));

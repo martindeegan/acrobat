@@ -10,7 +10,7 @@ from ament_index_python import get_package_share_directory
 import os
 from typing import Dict
 
-dataset_uri = '/home/martin/fpv_datasets/uzh_fpv/outdoor_forward_1_snapdragon_with_gt.bag'
+dataset_uri = '/home/martin/datasets/uzh-fpv/indoor_forward_3_snapdragon_with_gt.bag'
 module_toggles = {
     'sensors': {
         'arducam': False,
@@ -142,15 +142,23 @@ def generate_launch_description():
                                                  default_value='True', description='Enable ros1 bridge'))
     description.add_action(DeclareLaunchArgument(name='enable_rviz',
                                                  default_value='True', description='Enable rviz2 gui'))
+
+
+    detector_params = {
+        "fast_thresh": 10,
+        "nfeatures": 250,
+        "ssc_tolerance": 0.1,
+    }
+
     # TODO remove
     vio_node = Node(
         package='acrobat_localization',
-        node_executable='acrobat_vio',
+        node_executable='acrobat_localization_exec',
         node_name='acrobat_vio',
         node_namespace='',
         output='screen',
         emulate_tty=True,
-        parameters=[vio_params]
+        parameters=[vio_params, detector_params]
     )
     description.add_action(vio_node)
 
