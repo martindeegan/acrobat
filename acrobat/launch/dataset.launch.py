@@ -118,14 +118,14 @@ def generate_launch_description():
         'acrobat.rviz')
 
     # Launch RViz2
-    description.add_action(Node(
-        package='rviz2',
-        node_executable='rviz2',
-        node_name='rviz',
-        arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
-        output='screen',
-        emulate_tty=True
-    ))
+    # description.add_action(Node(
+    #     package='rviz2',
+    #     node_executable='rviz2',
+    #     node_name='rviz',
+    #     arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
+    #     output='screen',
+    #     emulate_tty=True
+    # ))
 
     description.add_action(
         LogInfo(msg=["===================================="]))

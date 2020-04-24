@@ -153,9 +153,13 @@ void VisualOdometry::imu_callback(const Imu::SharedPtr imu_msg) {
 }
 
 void VisualOdometry::image_callback(const Image::SharedPtr image_msg) {
+    static size_t frame_id = 1;
+
     Frame::SharedPtr frame =
-        std::make_shared<Frame>(cv_bridge::toCvShare(image_msg, image_msg->encoding));
+        std::make_shared<Frame>(cv_bridge::toCvShare(image_msg, image_msg->encoding), frame_id);
     frontend_->add_image(frame);
+
+    frame_id++;
 }
 
 void VisualOdometry::ground_truth_pose_callback(const PoseStamped::SharedPtr gt_msg) {

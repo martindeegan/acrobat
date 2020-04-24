@@ -12,12 +12,12 @@
   <build_depend>project_settings</build_depend>
   <build_depend>acrobat_common</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>g2o</build_depend>
+  <build_depend>gtsam</build_depend>
   <build_depend>anms</build_depend>
   
   <exec_depend>acrobat_common</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
-  <exec_depend>g2o</exec_depend>
+  <exec_depend>gtsam</exec_depend>
   <exec_depend>anms</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

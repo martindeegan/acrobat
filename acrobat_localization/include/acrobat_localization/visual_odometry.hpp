@@ -32,12 +32,13 @@ class VisualOdometry : public rclcpp::Node {
     explicit VisualOdometry(const rclcpp::NodeOptions& options);
     ~VisualOdometry();
 
-  private:
-    ImuPropagator::SharedPtr imu_propagator_;
-    Frontend::SharedPtr      frontend_;
-    Backend::SharedPtr       backend_;
-    Visualizer::SharedPtr    visualizer_;
+  public:
+    static ImuPropagator::SharedPtr imu_propagator_;
+    static Frontend::SharedPtr      frontend_;
+    static Backend::SharedPtr       backend_;
+    static Visualizer::SharedPtr    visualizer_;
 
+  private:
     std::atomic_bool running_;
     std::thread      frontend_thread_;
     std::thread      backend_thread_;

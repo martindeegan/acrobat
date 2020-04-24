@@ -22,11 +22,15 @@ class Backend {
     virtual void run();
     virtual void stop() noexcept;
 
+    void add_frame();
+    void add_map_point();
+
   private:
     std::atomic_bool running_;
 
     rclcpp::Logger logger_;
 
+  public:
     std::shared_ptr<gtsam::NonlinearFactorGraph> graph_;
     std::unique_ptr<gtsam::NonlinearOptimizer>   optimizer_;
 };

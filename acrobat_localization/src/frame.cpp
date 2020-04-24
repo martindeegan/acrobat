@@ -6,8 +6,8 @@
 
 namespace acrobat::localization {
 
-Frame::Frame(const cv_bridge::CvImageConstPtr& image)
-    : stamp_(image->header.stamp), image_(image) {}
+Frame::Frame(const cv_bridge::CvImageConstPtr& image, size_t frame_id)
+    : frame_id_(frame_id), stamp_(image->header.stamp), image_(image) {}
 
 const rclcpp::Time&              Frame::stamp() const noexcept { return stamp_; }
 const cv::Mat&                   Frame::image() const noexcept { return image_->image; }

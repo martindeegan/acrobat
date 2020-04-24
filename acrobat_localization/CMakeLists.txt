@@ -13,8 +13,16 @@ find_package(GTSAM REQUIRED)
 find_package(project_settings REQUIRED)
 find_package(acrobat_common REQUIRED)
 
-add_library(acrobat_vio SHARED src/visual_odometry.cpp src/imu_propagator.cpp src/frame.cpp src/frontend.cpp
-                               src/visualizer.cpp src/backend.cpp)
+add_library(
+  acrobat_vio SHARED
+  src/visual_odometry.cpp
+  src/imu_propagator.cpp
+  src/frame.cpp
+  src/frontend.cpp
+  src/visualizer.cpp
+  src/backend.cpp
+  src/map_point.cpp)
+
 target_include_directories(acrobat_vio PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                               "$<INSTALL_INTERFACE:include>")
 target_compile_definitions(acrobat_vio PRIVATE "COMPOSITION_BUILDING_DLL")

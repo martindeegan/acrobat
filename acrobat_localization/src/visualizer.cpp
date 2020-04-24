@@ -1,4 +1,7 @@
+#include "acrobat_localization/map_point.hpp"
 #include <acrobat_localization/visualizer.hpp>
+#include <opencv2/core/types.hpp>
+#include <opencv2/imgproc.hpp>
 
 namespace acrobat::localization {
 
@@ -14,9 +17,21 @@ Visualizer::Visualizer(rclcpp::Logger logger, std::string window_name)
     cv::namedWindow(window_name_);
 }
 
-void Visualizer::display_frame(const Frame::SharedPtr& frame) const {
+void Visualizer::display_frame(const Frame::SharedPtr&  frame,
+                               std::vector<cv::DMatch>& matches,
+                               std::vector<bool>&       valid) const {
     cv::Mat image_with_keypoints;
-    cv::drawKeypoints(frame->image(), frame->keypoints(), image_with_keypoints, {0.0, 255.0, 0.0});
+    cv::cvtColor(frame->image(), image_with_keypoints, cv::COLOR_GRAY2RGB);
+
+    for (size_t i = 0; i < frame->keypoints().size(); i++) {
+        cv::Scalar color;
+        if (valid[i]) {
+            color = {0.0, 255.0, 0.0};
+        } else {
+            color = {255.0, 0.0, 0.0};
+        }
+        cv::circle(image_with_keypoints, frame->keypoints()[i].pt, 3, color);
+    }
     cv::imshow(window_name_, image_with_keypoints);
     cv::waitKey(1);
 }
