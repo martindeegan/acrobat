@@ -31,8 +31,8 @@ class Backend {
     rclcpp::Logger logger_;
 
   public:
-    std::shared_ptr<gtsam::NonlinearFactorGraph> graph_;
-    std::unique_ptr<gtsam::NonlinearOptimizer>   optimizer_;
+    gtsam::NonlinearFactorGraph::shared_ptr graph_;
+    gtsam::NonlinearOptimizer::shared_ptr   optimizer_;
 };
 
 } // namespace acrobat::localization

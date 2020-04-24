@@ -1,7 +1,6 @@
 #include "acrobat_localization/visual_odometry.hpp"
 #include <acrobat_localization/frame.hpp>
 #include <acrobat_localization/map_point.hpp>
-#include <acrobat_localization/visual_odometry.hpp>
 #include <gtsam/geometry/Point2.h>
 #include <memory>
 
@@ -16,8 +15,8 @@ MapPoint::MapPoint(const rclcpp::Time&            stamp,
       need_recompute_descriptor(true) {
     factor_                    = boost::make_shared<SmartFactor>(meas_noise, camera_cal);
     static size_t map_point_id = 0;
-    factor_graph_idx_          = VisualOdometry::backend_->graph_->size();
-    VisualOdometry::backend_->graph_->add(factor_);
+    factor_graph_idx_          = StaticGetters::get_factor_graph()->size();
+    StaticGetters::get_factor_graph()->add(factor_);
     map_point_id++;
 }
 

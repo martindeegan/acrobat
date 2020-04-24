@@ -24,6 +24,11 @@ using namespace std::chrono_literals;
 
 namespace acrobat::localization {
 
+ImuPropagator::SharedPtr VisualOdometry::imu_propagator_ = ImuPropagator::SharedPtr(nullptr);
+Frontend::SharedPtr      VisualOdometry::frontend_       = Frontend::SharedPtr(nullptr);
+Backend::SharedPtr       VisualOdometry::backend_        = Backend::SharedPtr(nullptr);
+Visualizer::SharedPtr    VisualOdometry::visualizer_     = Visualizer::SharedPtr(nullptr);
+
 VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrobat_vio", options) {
     // Variable Topics
     declare_parameter<std::string>("camera_topic", "/acrobat/camera");
@@ -47,9 +52,9 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
     RCLCPP_INFO(get_logger(), "Initializing VIO modules");
     // Create modules and launch threads
     if (parameter_client->get_parameter<bool>("display")) {
-        visualizer_ = Visualizer::create(get_logger());
+        VisualOdometry::visualizer_ = Visualizer::create(get_logger());
     }
-    imu_propagator_ = ImuPropagator::create(get_logger());
+    VisualOdometry::imu_propagator_ = ImuPropagator::create(get_logger());
     auto feature_detector =
         cv::ORB::create(parameter_client->get_parameter<int>("ORB_nfeatures"),
                         parameter_client->get_parameter<float>("ORB_scalefactor"),
@@ -60,8 +65,9 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
                         cv::ORB::ScoreType::HARRIS_SCORE,
                         parameter_client->get_parameter<int>("ORB_patchsize"),
                         parameter_client->get_parameter<int>("ORB_fastthresh"));
-    frontend_ = Frontend::create<cv::ORB>(get_logger(), visualizer_, feature_detector);
-    backend_  = Backend::create(get_logger());
+    VisualOdometry::frontend_ =
+        Frontend::create<cv::ORB>(get_logger(), visualizer_, feature_detector);
+    VisualOdometry::backend_ = Backend::create(get_logger());
 
     RCLCPP_INFO(get_logger(), "Launching frontend and backend threads.");
     frontend_thread_ = std::thread(std::bind(&Frontend::run, frontend_));

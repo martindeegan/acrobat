@@ -1,6 +1,8 @@
 #pragma once
 
 #include <atomic>
+#include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -60,6 +62,18 @@ class VisualOdometry : public rclcpp::Node {
         ground_truth_pose_subscription_;
     rclcpp::Subscription<geometry_msgs::msg::TransformStamped>::SharedPtr
         ground_truth_transform_subscription_;
+};
+
+struct StaticGetters {
+    static Backend::SharedPtr get_backend() { return VisualOdometry::backend_; }
+
+    static gtsam::NonlinearFactorGraph::shared_ptr get_factor_graph() {
+        return VisualOdometry::backend_->graph_;
+    }
+
+    static Frontend::SharedPtr get_frontend() { return VisualOdometry::frontend_; }
+
+    static Visualizer::SharedPtr get_visualizer() { return VisualOdometry::visualizer_; }
 };
 
 } // namespace acrobat::localization
