@@ -12,11 +12,14 @@ MapPoint::MapPoint(const rclcpp::Time&            stamp,
                    const Calibration::shared_ptr& camera_cal)
     : last_observation_timestamp_(stamp),
       last_reprojection_error_(0.0),
-      need_recompute_descriptor(true) {
+      need_recompute_descriptor(true),
+      first_frame_id_(frame->frame_id_),
+      last_frame_id_(frame->frame_id_),
+      mark_erase(false),
+      mark_deproject(false) {
     factor_                    = boost::make_shared<SmartFactor>(meas_noise, camera_cal);
     static size_t map_point_id = 0;
-    factor_graph_idx_          = StaticGetters::get_factor_graph()->size();
-    StaticGetters::get_factor_graph()->add(factor_);
+    map_point_id_              = map_point_id;
     map_point_id++;
 }
 
@@ -27,10 +30,19 @@ void MapPoint::add_observation(const std::shared_ptr<Frame>& frame, size_t index
     // After all measurements are added to smart factor add to graph
     // (will the smart factor ever be added to the graph already, will we need to
     //  re-add it?)
-    const auto pt = frame->keypoints().at(index).pt;
-    factor_->add(gtsam::Point2(pt.x, pt.y), gtsam::symbol('x', frame->frame_id_));
+    const auto    pt             = frame->keypoints()[index].pt;
+    static size_t observation_id = 0;
+    last_frame_id_               = frame->frame_id_;
+
+    // Check if there is a duplicate observation
+    if (observations_.find(frame) == observations_.end()) {
+        observations_.insert({frame, index});
+        factor_->add(gtsam::Point2(pt.x, pt.y), gtsam::Symbol('x', frame->frame_id_));
+    }
 }
 
-void MapPoint::release() { VisualOdometry::backend_->graph_->remove(factor_graph_idx_); }
+void MapPoint::release() {}
+
+void MapPoint::add_to_graph() { StaticGetters::get_factor_graph()->add(factor_); }
 
 } // namespace acrobat::localization

@@ -10,7 +10,7 @@ from ament_index_python import get_package_share_directory
 import os
 from typing import Dict
 
-dataset_uri = '/home/martin/datasets/uzh-fpv/indoor_forward_3_snapdragon_with_gt.bag'
+dataset_uri = '/home/martin/datasets/uzh-fpv/indoor_forward_3_snapdragon_with_gt_trimmed.bag'
 module_toggles = {
     'sensors': {
         'arducam': False,
@@ -33,7 +33,7 @@ vio_params = {
     'display': True
 }
 
-rviz_reference_frame = 'ground_truth'
+rviz_reference_frame = 'world'
 
 
 def get_toggle(name: str):
@@ -118,14 +118,14 @@ def generate_launch_description():
         'acrobat.rviz')
 
     # Launch RViz2
-    # description.add_action(Node(
-    #     package='rviz2',
-    #     node_executable='rviz2',
-    #     node_name='rviz',
-    #     arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
-    #     output='screen',
-    #     emulate_tty=True
-    # ))
+    description.add_action(Node(
+        package='rviz2',
+        node_executable='rviz2',
+        node_name='rviz',
+        arguments=['-d', rviz_config_dir, '-f', rviz_reference_frame],
+        output='screen',
+        emulate_tty=True
+    ))
 
     description.add_action(
         LogInfo(msg=["===================================="]))

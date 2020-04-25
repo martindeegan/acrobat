@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rclcpp/publisher.hpp"
+#include "visualization_msgs/msg/marker_array__struct.hpp"
 #include <atomic>
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <memory>
@@ -35,10 +37,11 @@ class VisualOdometry : public rclcpp::Node {
     ~VisualOdometry();
 
   public:
-    static ImuPropagator::SharedPtr imu_propagator_;
-    static Frontend::SharedPtr      frontend_;
-    static Backend::SharedPtr       backend_;
-    static Visualizer::SharedPtr    visualizer_;
+    static ImuPropagator::SharedPtr                                           imu_propagator_;
+    static Frontend::SharedPtr                                                frontend_;
+    static Backend::SharedPtr                                                 backend_;
+    static Visualizer::SharedPtr                                              visualizer_;
+    static rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr viz_pub_;
 
   private:
     std::atomic_bool running_;

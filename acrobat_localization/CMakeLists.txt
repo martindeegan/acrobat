@@ -5,6 +5,7 @@ project(acrobat_localization CXX)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(GTSAM REQUIRED)
@@ -33,6 +34,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclcpp_components"
   "sensor_msgs"
+  "visualization_msgs"
   "cv_bridge")
 target_link_libraries(acrobat_vio gtsam)
 rclcpp_components_register_nodes(acrobat_vio "acrobat::localization::VisualOdometry")

@@ -1,3 +1,4 @@
+#include "acrobat_localization/visual_odometry.hpp"
 #include <acrobat_localization/anms/anms.h>
 #include <acrobat_localization/frame.hpp>
 #include <numeric>

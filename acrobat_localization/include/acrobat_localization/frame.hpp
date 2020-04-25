@@ -51,7 +51,9 @@ class Frame {
     void release_image();
 
   public:
-    const size_t frame_id_;
+    size_t       frame_id_;
+    gtsam::Pose3 pose_;
+    rclcpp::Time received_stamp_;
 
   private:
     rclcpp::Time               stamp_;
@@ -60,8 +62,6 @@ class Frame {
     std::vector<cv::KeyPoint>  keypoints_;
 
     std::set<std::shared_ptr<MapPoint>> map_points_;
-
-    gtsam::Pose3 pose_;
 };
 
 } // namespace acrobat::localization

@@ -51,6 +51,15 @@ class MapPoint {
     void add_observation(const std::shared_ptr<Frame>& frame, size_t index);
 
     void release();
+
+    size_t map_point_id_;
+    size_t first_frame_id_;
+    size_t last_frame_id_;
+
+    bool mark_erase;
+    bool mark_deproject;
+
+    void add_to_graph();
 };
 
 } // namespace acrobat::localization

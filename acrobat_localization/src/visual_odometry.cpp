@@ -1,7 +1,10 @@
+#include "rclcpp/time.hpp"
 #include <chrono>
 #include <functional>
 
 #include <cv_bridge/cv_bridge.h>
+#include <gtsam/geometry/Pose3.h>
+#include <memory>
 #include <opencv2/features2d.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <visualization_msgs/msg/marker.hpp>
@@ -28,6 +31,8 @@ ImuPropagator::SharedPtr VisualOdometry::imu_propagator_ = ImuPropagator::Shared
 Frontend::SharedPtr      VisualOdometry::frontend_       = Frontend::SharedPtr(nullptr);
 Backend::SharedPtr       VisualOdometry::backend_        = Backend::SharedPtr(nullptr);
 Visualizer::SharedPtr    VisualOdometry::visualizer_     = Visualizer::SharedPtr(nullptr);
+rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr VisualOdometry::viz_pub_ =
+    nullptr;
 
 VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrobat_vio", options) {
     // Variable Topics
@@ -68,6 +73,8 @@ VisualOdometry::VisualOdometry(const rclcpp::NodeOptions& options) : Node("acrob
     VisualOdometry::frontend_ =
         Frontend::create<cv::ORB>(get_logger(), visualizer_, feature_detector);
     VisualOdometry::backend_ = Backend::create(get_logger());
+
+    viz_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("vio_viz", 10);
 
     RCLCPP_INFO(get_logger(), "Launching frontend and backend threads.");
     frontend_thread_ = std::thread(std::bind(&Frontend::run, frontend_));
@@ -159,7 +166,7 @@ void VisualOdometry::imu_callback(const Imu::SharedPtr imu_msg) {
 }
 
 void VisualOdometry::image_callback(const Image::SharedPtr image_msg) {
-    static size_t frame_id = 1;
+    static size_t frame_id = 0;
 
     Frame::SharedPtr frame =
         std::make_shared<Frame>(cv_bridge::toCvShare(image_msg, image_msg->encoding), frame_id);
@@ -173,20 +180,13 @@ void VisualOdometry::ground_truth_pose_callback(const PoseStamped::SharedPtr gt_
     pose_msg.child_frame_id = rf::ground_truth;
     pose_msg.header         = gt_msg->header;
 
-    static bool            first_message = true;
-    static lie_groups::SE3 first_pose;
-    if (first_message) {
-        lie_group_conversions::convert(gt_msg->pose, first_pose);
-        first_pose    = first_pose.inverse();
-        first_message = false;
-    }
-
-    // Remove starting offset
     lie_groups::SE3 pose;
     lie_group_conversions::convert(gt_msg->pose, pose);
-    pose = first_pose * pose;
-
     lie_group_conversions::convert(pose, pose_msg.transform);
+
+    auto gtsam_pose =
+        std::make_shared<gtsam::Pose3>(gtsam::Rot3{pose.so3().matrix()}, pose.translation());
+    frontend_->add_prior(gtsam_pose);
 
     tf_broadcaster_->sendTransform(pose_msg);
 }
